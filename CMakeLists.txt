@@ -58,9 +58,9 @@ if(PLATFORM_WINDOWS)
 elseif(PLATFORM_LINUX)
     # Linux特定库
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(V4L2 REQUIRED libv4l2)
     pkg_check_modules(X11 REQUIRED x11)
-    set(PLATFORM_LIBS ${V4L2_LIBRARIES} ${X11_LIBRARIES})
+    # V4L2是内核接口，不需要额外的库
+    set(PLATFORM_LIBS ${X11_LIBRARIES})
 endif()
 
 # 源文件
@@ -75,12 +75,14 @@ set(SOURCES
     src/devices/camera/CameraManager.cpp
     src/devices/signature/SignaturePadAdapter.cpp
     src/devices/signature/FullscreenWindow.cpp
+    src/plugins/PluginLoader.cpp
+    src/plugins/CameraManager.cpp
     src/gui/MainWindow.cpp
     src/gui/IDCardPanel.cpp
     src/gui/CameraPanel.cpp
     src/gui/SignaturePanel.cpp
     src/gui/Theme.cpp
-    src/utils/Logger.cpp
+    src/utils/LogDisplay.cpp
     src/utils/FileUtils.cpp
     src/utils/StringUtils.cpp
 )
@@ -114,18 +116,44 @@ set(HEADERS
     include/devices/camera/CameraManager.h
     include/devices/signature/SignaturePadAdapter.h
     include/devices/signature/FullscreenWindow.h
+    include/plugins/ICameraPlugin.h
+    include/plugins/PluginLoader.h
+    include/plugins/CameraManager.h
     include/gui/MainWindow.h
     include/gui/IDCardPanel.h
     include/gui/CameraPanel.h
     include/gui/SignaturePanel.h
     include/gui/Theme.h
     include/utils/Logger.h
+    include/utils/LogDisplay.h
     include/utils/FileUtils.h
     include/utils/StringUtils.h
 )
 
+# 创建Logger库
+add_library(Logger STATIC
+    src/utils/Logger.cpp
+    include/utils/Logger.h
+)
+
+target_include_directories(Logger PUBLIC
+    include
+)
+
+# 设置Logger库的编译定义
+if(ENABLE_LOGGING)
+    target_compile_definitions(Logger PRIVATE ENABLE_LOGGING)
+endif()
+
 # 创建可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+# 构建插件
+if(PLATFORM_WINDOWS)
+    add_subdirectory(plugins/windows/DirectShowPlugin)
+elseif(PLATFORM_LINUX)
+    add_subdirectory(plugins/linux/V4L2Plugin)
+endif()
 
 # 创建ImGui库
 add_library(imgui STATIC
@@ -153,6 +181,7 @@ target_link_libraries(${PROJECT_NAME}
     imgui
     glfw
     OpenGL::GL
+    Logger
     ${PLATFORM_LIBS}
 )
 
@@ -160,7 +189,7 @@ target_link_libraries(${PROJECT_NAME}
 if(PLATFORM_WINDOWS)
     target_link_libraries(${PROJECT_NAME} opengl32)
 elseif(PLATFORM_LINUX)
-    target_link_libraries(${PROJECT_NAME} ${V4L2_LIBRARIES} ${X11_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
 endif()
 
 # 包含目录
@@ -177,7 +206,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 )
 
 if(ENABLE_LOGGING)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_LOGGING)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_LOGGING ENABLE_LOG_DISPLAY)
 endif()
 
 # 安装规则

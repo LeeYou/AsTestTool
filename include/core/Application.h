@@ -3,12 +3,12 @@
 #include "devices/interfaces/IIDCardReader.h"
 #include "devices/interfaces/ICamera.h"
 #include "devices/interfaces/ISignaturePad.h"
+#include "gui/MainWindow.h"
 #include <memory>
 #include <string>
 
 // Forward declarations
 struct GLFWwindow;
-class MainWindow;
 
 namespace AsTestTool {
 
@@ -164,8 +164,8 @@ private:
     std::unique_ptr<ICamera> m_camera;
     std::unique_ptr<ISignaturePad> m_signaturePad;
     
-    // GUI (暂时不使用MainWindow)
-    // std::unique_ptr<MainWindow> m_mainWindow;
+    // GUI
+    std::unique_ptr<MainWindow> m_mainWindow;
 };
 
 } // namespace AsTestTool

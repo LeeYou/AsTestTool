@@ -4,6 +4,8 @@
 #include "gui/IDCardPanel.h"
 #include "gui/CameraPanel.h"
 #include "gui/SignaturePanel.h"
+#include "core/DeviceFactory.h"
+#include "plugins/CameraManager.h"
 
 namespace AsTestTool {
 
@@ -51,11 +53,18 @@ private:
     void RenderMenuBar();
     void RenderMainContent();
     void RenderStatusBar();
+    void RenderDebugInfo();
+    void InitializeDevices();
 
     bool m_initialized = false;
     std::unique_ptr<IDCardPanel> m_idCardPanel;
     std::unique_ptr<CameraPanel> m_cameraPanel;
     std::unique_ptr<SignaturePanel> m_signaturePanel;
+    
+    // 设备管理
+    std::shared_ptr<Plugins::CameraManager> m_cameraManager;
+    std::shared_ptr<IIDCardReader> m_idCardReader;
+    std::shared_ptr<ISignaturePad> m_signaturePad;
 };
 
 } // namespace AsTestTool

@@ -4,6 +4,11 @@
 #include <sstream>
 #include <chrono>
 
+// 前向声明，避免在插件中依赖LogDisplay
+#ifdef ENABLE_LOG_DISPLAY
+#include "utils/LogDisplay.h"
+#endif
+
 namespace AsTestTool {
 
 Logger& Logger::Instance() {
@@ -60,6 +65,11 @@ void Logger::Log(LogLevel level, const std::string& message) {
         m_file << logMessage;
         m_file.flush();
     }
+    
+    // 调用日志回调（如果设置了）
+    if (m_logCallback) {
+        m_logCallback(level, message);
+    }
 }
 
 void Logger::Debug(const std::string& message) {
@@ -76,6 +86,11 @@ void Logger::Warning(const std::string& message) {
 
 void Logger::Error(const std::string& message) {
     Log(LogLevel::Error, message);
+}
+
+void Logger::SetLogCallback(std::function<void(LogLevel, const std::string&)> callback) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_logCallback = callback;
 }
 
 std::string Logger::GetLevelString(LogLevel level) const {

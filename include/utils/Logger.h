@@ -4,6 +4,7 @@
 #include <fstream>
 #include <mutex>
 #include <memory>
+#include <functional>
 
 namespace AsTestTool {
 
@@ -77,6 +78,12 @@ public:
      */
     void Error(const std::string& message);
 
+    /**
+     * @brief 设置日志回调函数（用于GUI显示）
+     * @param callback 回调函数
+     */
+    void SetLogCallback(std::function<void(LogLevel, const std::string&)> callback);
+
 private:
     Logger() = default;
     ~Logger() = default;
@@ -91,6 +98,7 @@ private:
     std::ofstream m_file;
     bool m_consoleOutput = true;
     std::mutex m_mutex;
+    std::function<void(LogLevel, const std::string&)> m_logCallback;
 };
 
 // 便捷宏定义

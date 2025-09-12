@@ -2,7 +2,9 @@
 #include "core/DeviceFactory.h"
 #include "core/Config.h"
 #include "utils/Logger.h"
+#include "utils/LogDisplay.h"
 #include "core/ErrorCode.h"
+#include "gui/MainWindow.h"
 #include <thread>
 #include <chrono>
 #include <filesystem>
@@ -36,6 +38,19 @@ bool Application::Initialize() {
     try {
         // 设置默认配置
         Config::Instance().SetDefaults();
+        
+        // 设置Logger回调，将日志转发到LogDisplay
+        Logger::Instance().SetLogCallback([](LogLevel level, const std::string& message) {
+            LogDisplayLevel displayLevel;
+            switch (level) {
+                case LogLevel::Debug: displayLevel = LogDisplayLevel::Debug; break;
+                case LogLevel::Info: displayLevel = LogDisplayLevel::Info; break;
+                case LogLevel::Warning: displayLevel = LogDisplayLevel::Warning; break;
+                case LogLevel::Error: displayLevel = LogDisplayLevel::Error; break;
+                default: displayLevel = LogDisplayLevel::Info; break;
+            }
+            LogDisplay::Instance().AddLog(displayLevel, message);
+        });
         
         // 初始化设备
         if (!InitializeDevices()) {
@@ -166,11 +181,11 @@ bool Application::InitializeGUI() {
     }
     
     // 创建主窗口
-    // m_mainWindow = std::make_unique<MainWindow>();
-    // if (!m_mainWindow->Initialize()) {
-    //     LOG_ERROR("Failed to initialize main window");
-    //     return false;
-    // }
+    m_mainWindow = std::make_unique<MainWindow>();
+    if (!m_mainWindow->Initialize()) {
+        LOG_ERROR("Failed to initialize main window");
+        return false;
+    }
     
     LOG_INFO("GUI initialized successfully");
     return true;
@@ -180,9 +195,9 @@ void Application::ShutdownGUI() {
     LOG_INFO("Shutting down GUI");
     
     // 清理主窗口
-    // if (m_mainWindow) {
-    //     m_mainWindow.reset();
-    // }
+    if (m_mainWindow) {
+        m_mainWindow.reset();
+    }
     
     // 关闭ImGui
     ShutdownImGui();
@@ -206,12 +221,9 @@ void Application::MainLoop() {
         ImGui::NewFrame();
         
         // 渲染主窗口
-        // if (m_mainWindow) {
-        //     m_mainWindow->Render();
-        // }
-        
-        // 临时渲染一个简单的界面
-        RenderSimpleUI();
+        if (m_mainWindow) {
+            m_mainWindow->Render();
+        }
         
         // 渲染ImGui
         ImGui::Render();
@@ -247,6 +259,9 @@ bool Application::InitializeGLFW() {
         glfwTerminate();
         return false;
     }
+    
+    // 设置窗口为最大化模式
+    glfwMaximizeWindow(m_window);
     
     // 设置上下文
     glfwMakeContextCurrent(m_window);
