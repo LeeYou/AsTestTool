@@ -329,15 +329,21 @@ bool Application::InitializeImGui() {
     // 在渲染器初始化后设置中文字体
     SetupChineseFonts();
     
+    m_guiInitialized = true;
     LOG_INFO("ImGui initialized successfully");
     return true;
 }
 
 void Application::ShutdownImGui() {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-    LOG_INFO("ImGui shutdown complete");
+    if (m_guiInitialized) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+        m_guiInitialized = false;
+        LOG_INFO("ImGui shutdown complete");
+    } else {
+        LOG_INFO("ImGui was not initialized, skipping shutdown");
+    }
 }
 
 void Application::ProcessEvents() {
@@ -440,12 +446,29 @@ void Application::SetupChineseFonts() {
     
     // 尝试加载系统中文字体
     const char* fontPaths[] = {
+        // Windows字体
         "C:/Windows/Fonts/msyh.ttc",      // 微软雅黑
         "C:/Windows/Fonts/simsun.ttc",    // 宋体
         "C:/Windows/Fonts/simhei.ttf",    // 黑体
         "C:/Windows/Fonts/simkai.ttf",    // 楷体
-        "/System/Library/Fonts/PingFang.ttc",  // macOS
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  // Linux
+        
+        // macOS字体
+        "/System/Library/Fonts/PingFang.ttc",
+        
+        // Linux中文字体
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",  // Noto Sans CJK
+        "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc", // Noto Serif CJK
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",  // Noto Sans CJK (TTF)
+        "/usr/share/fonts/truetype/noto/NotoSerifCJK-Regular.ttc", // Noto Serif CJK (TTF)
+        "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",         // 文泉驿微米黑
+        "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",           // 文泉驿正黑
+        "/usr/share/fonts/truetype/arphic/ukai.ttc",              // AR PL UKai
+        "/usr/share/fonts/truetype/arphic/uming.ttc",             // AR PL UMing
+        "/usr/share/fonts/truetype/droid/DroidSansFallback.ttf",  // Droid Sans Fallback
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", // Liberation Sans
+        
+        // 通用字体作为后备
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         nullptr
     };
     
@@ -455,7 +478,7 @@ void Application::SetupChineseFonts() {
             LOG_INFO("Loading Chinese font: " + std::string(fontPaths[i]));
             chineseFont = io.Fonts->AddFontFromFileTTF(fontPaths[i], 16.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
             if (chineseFont) {
-                LOG_INFO("Chinese font loaded successfully");
+                LOG_INFO("Chinese font loaded successfully: " + std::string(fontPaths[i]));
                 break;
             } else {
                 LOG_WARNING("Failed to load font: " + std::string(fontPaths[i]));
@@ -469,6 +492,12 @@ void Application::SetupChineseFonts() {
     if (!chineseFont) {
         LOG_WARNING("Failed to load Chinese font, using default font");
         chineseFont = io.Fonts->AddFontDefault();
+    }
+    
+    // 重建字体纹理
+    if (chineseFont) {
+        io.Fonts->Build();
+        LOG_INFO("Font atlas built successfully");
     }
     
     LOG_INFO("Font setup completed");

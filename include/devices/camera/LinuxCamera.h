@@ -1,6 +1,14 @@
 #pragma once
 
 #include "devices/interfaces/ICamera.h"
+#include <memory>
+
+// Forward declaration
+namespace AsTestTool {
+namespace Plugins {
+    class CameraManager;
+}
+}
 
 namespace AsTestTool {
 
@@ -33,6 +41,7 @@ private:
     bool m_initialized = false;
     bool m_previewActive = false;
     Resolution m_currentResolution;
+    std::unique_ptr<Plugins::CameraManager> m_cameraManager;
 };
 
 } // namespace AsTestTool

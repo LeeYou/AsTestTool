@@ -153,6 +153,7 @@ private:
 
     bool m_initialized = false;
     bool m_running = false;
+    bool m_guiInitialized = false;
     
     // GLFW and OpenGL
     GLFWwindow* m_window = nullptr;

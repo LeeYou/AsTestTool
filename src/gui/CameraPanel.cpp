@@ -151,19 +151,23 @@ void CameraPanel::RenderDeviceControls() {
     
     ImGui::Separator();
     
-    // 第二行：主要控制按钮
+    // 第二行：主要控制按钮 - 使用更紧凑的布局
     ImGui::Text("主要操作:");
-    ImGui::SameLine();
+    
+    // 计算可用宽度并调整按钮大小
+    float availableWidth = ImGui::GetContentRegionAvail().x;
+    float buttonWidth = std::min(80.0f, (availableWidth - 200) / 4.0f); // 为分辨率选择留出空间
+    buttonWidth = std::max(60.0f, buttonWidth); // 最小宽度
     
     // 大号拍照按钮
-    if (ImGui::Button("[拍照]", ImVec2(80, 40))) {
+    if (ImGui::Button("📷 拍照", ImVec2(buttonWidth, 35))) {
         LOG_INFO("Capture button clicked");
         CaptureImage();
     }
     ImGui::SameLine();
     
     // 录像按钮
-    if (ImGui::Button("[录像]", ImVec2(80, 40))) {
+    if (ImGui::Button("🎥 录像", ImVec2(buttonWidth, 35))) {
         LOG_INFO("Record button clicked");
         ToggleRecording();
     }
@@ -171,20 +175,19 @@ void CameraPanel::RenderDeviceControls() {
     
     // 预览控制
     if (m_previewActive) {
-        if (ImGui::Button("[停止预览]", ImVec2(100, 40))) {
+        if (ImGui::Button("⏹ 停止预览", ImVec2(buttonWidth + 20, 35))) {
             LOG_INFO("Stop preview button clicked");
             StopPreview();
         }
     } else {
-        if (ImGui::Button("[开始预览]", ImVec2(100, 40))) {
+        if (ImGui::Button("▶ 开始预览", ImVec2(buttonWidth + 20, 35))) {
             LOG_INFO("Start preview button clicked");
             StartPreview();
         }
     }
     
-    ImGui::SameLine();
-    
-    // 分辨率选择 - 显示设备支持的实际分辨率
+    // 第三行：分辨率选择 - 单独一行
+    ImGui::NewLine();
     ImGui::Text("分辨率:");
     ImGui::SameLine();
     RenderResolutionSelector();
@@ -212,9 +215,18 @@ void CameraPanel::RenderPreviewArea() {
                 m_imageWidth = width;
                 m_imageHeight = height;
                 m_hasImageData = true;
-                LOG_INFO("Image captured: " + std::to_string(width) + "x" + std::to_string(height) + ", data size: " + std::to_string(m_imageData.size()));
+                m_currentFormat = GetPixelFormatString(format);
+                // 减少日志输出频率，避免刷屏
+                static int logCounter = 0;
+                if (++logCounter % 30 == 0) { // 每30帧输出一次日志
+                    LOG_INFO("Preview frame: " + std::to_string(width) + "x" + std::to_string(height) + ", data size: " + std::to_string(m_imageData.size()));
+                }
             } else {
-                LOG_ERROR("Failed to capture image");
+                // 减少错误日志频率
+                static int errorCounter = 0;
+                if (++errorCounter % 60 == 0) { // 每60帧输出一次错误日志
+                    LOG_ERROR("Failed to capture preview frame");
+                }
             }
         }
         
@@ -290,28 +302,63 @@ void CameraPanel::RenderPreviewArea() {
             ImVec2 previewStart = ImVec2(windowPos.x + centerPos.x, windowPos.y + centerPos.y);
             ImVec2 previewEnd = ImVec2(previewStart.x + previewSize.x, previewStart.y + previewSize.y);
             
-            drawList->AddRectFilled(previewStart, previewEnd, IM_COL32(20, 20, 20, 255));
-            drawList->AddRect(previewStart, previewEnd, IM_COL32(100, 100, 100, 255), 0.0f, 0, 2.0f);
+            // 绘制渐变背景
+            drawList->AddRectFilled(previewStart, previewEnd, IM_COL32(30, 30, 30, 255));
+            drawList->AddRect(previewStart, previewEnd, IM_COL32(80, 80, 80, 255), 0.0f, 0, 2.0f);
             
+            // 绘制摄像头图标和状态文本
             ImVec2 center = ImVec2((previewStart.x + previewEnd.x) * 0.5f, (previewStart.y + previewEnd.y) * 0.5f);
-            ImVec2 textPos = ImVec2(center.x - 60, center.y - 10);
-            drawList->AddText(textPos, IM_COL32(255, 255, 255, 255), "正在获取图像...");
+            
+            // 摄像头图标
+            ImVec2 iconPos = ImVec2(center.x - 20, center.y - 30);
+            drawList->AddText(iconPos, IM_COL32(150, 150, 150, 255), "📷");
+            
+            // 状态文本
+            ImVec2 textPos = ImVec2(center.x - 80, center.y + 10);
+            drawList->AddText(textPos, IM_COL32(200, 200, 200, 255), "正在获取图像...");
+            
+            // 提示文本
+            ImVec2 hintPos = ImVec2(center.x - 100, center.y + 30);
+            drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "请稍候，正在连接摄像头");
         }
         
         // 创建一个透明的ImGui区域用于交互
         ImGui::Dummy(previewSize);
     } else {
-        // 占位符
-        ImGui::Dummy(previewSize);
-        ImGui::SetCursorPos(ImVec2(centerPos.x + previewSize.x * 0.5f - 50, centerPos.y + previewSize.y * 0.5f));
-        ImGui::Text("预览区域");
+        // 非预览状态下的占位符
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        ImVec2 windowPos = ImGui::GetWindowPos();
+        ImVec2 previewStart = ImVec2(windowPos.x + centerPos.x, windowPos.y + centerPos.y);
+        ImVec2 previewEnd = ImVec2(previewStart.x + previewSize.x, previewStart.y + previewSize.y);
+        
+        // 绘制背景
+        drawList->AddRectFilled(previewStart, previewEnd, IM_COL32(40, 40, 40, 255));
+        drawList->AddRect(previewStart, previewEnd, IM_COL32(100, 100, 100, 255), 0.0f, 0, 2.0f);
+        
+        // 绘制中心内容
+        ImVec2 center = ImVec2((previewStart.x + previewEnd.x) * 0.5f, (previewStart.y + previewEnd.y) * 0.5f);
+        
+        // 摄像头图标
+        ImVec2 iconPos = ImVec2(center.x - 25, center.y - 40);
+        drawList->AddText(iconPos, IM_COL32(100, 100, 100, 255), "📷");
+        
+        // 状态文本
         if (!m_previewActive) {
-            ImGui::SetCursorPos(ImVec2(centerPos.x + previewSize.x * 0.5f - 80, centerPos.y + previewSize.y * 0.5f + 20));
-            ImGui::Text("点击开始预览");
+            ImVec2 textPos = ImVec2(center.x - 60, center.y + 10);
+            drawList->AddText(textPos, IM_COL32(180, 180, 180, 255), "预览区域");
+            
+            ImVec2 hintPos = ImVec2(center.x - 100, center.y + 30);
+            drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "点击 [开始预览] 按钮");
         } else if (!m_connected) {
-            ImGui::SetCursorPos(ImVec2(centerPos.x + previewSize.x * 0.5f - 80, centerPos.y + previewSize.y * 0.5f + 20));
-            ImGui::Text("请先连接设备");
+            ImVec2 textPos = ImVec2(center.x - 80, center.y + 10);
+            drawList->AddText(textPos, IM_COL32(200, 100, 100, 255), "设备未连接");
+            
+            ImVec2 hintPos = ImVec2(center.x - 100, center.y + 30);
+            drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "请先选择并连接摄像头设备");
         }
+        
+        // 创建一个透明的ImGui区域用于交互
+        ImGui::Dummy(previewSize);
     }
     
     // 双击全屏
@@ -723,6 +770,26 @@ void CameraPanel::RenderGridLines(const ImVec2& startPos, const ImVec2& size) {
     for (int i = 1; i < 3; i++) {
         float y = gridStart.y + (size.y * i / 3);
         drawList->AddLine(ImVec2(gridStart.x, y), ImVec2(gridStart.x + size.x, y), gridColor);
+    }
+}
+
+std::string CameraPanel::GetPixelFormatString(Plugins::PixelFormat format) const {
+    switch (format) {
+        case Plugins::PixelFormat::YUV420:
+            return "YUV420";
+        case Plugins::PixelFormat::YUV422:
+            return "YUV422";
+        case Plugins::PixelFormat::RGB24:
+            return "RGB24";
+        case Plugins::PixelFormat::RGB32:
+            return "RGB32";
+        case Plugins::PixelFormat::MJPG:
+            return "MJPG";
+        case Plugins::PixelFormat::H264:
+            return "H264";
+        case Plugins::PixelFormat::Unknown:
+        default:
+            return "Unknown";
     }
 }
 

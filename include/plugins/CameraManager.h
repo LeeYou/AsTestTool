@@ -72,6 +72,7 @@ private:
     std::string DetectPlatform() const;
     std::string GetDefaultPluginPath() const;
     std::string GetDefaultPluginName() const;
+    std::string ExtractPluginNameFromPath(const std::string& pluginPath) const;
     
     // 错误处理
     void SetLastError(const std::string& error, int code = -1);

@@ -61,6 +61,7 @@ private:
     void RenderImageInfo();
     void RenderGridLines(const ImVec2& startPos, const ImVec2& size);
     void RenderResolutionSelector();
+    std::string GetPixelFormatString(Plugins::PixelFormat format) const;
 
     // 功能方法
     void UpdateLayout();

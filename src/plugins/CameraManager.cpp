@@ -100,8 +100,9 @@ bool CameraManager::LoadPlatformPlugin() {
             return false;
         }
         
-        // 创建插件实例
-        m_currentPlugin = m_pluginLoader->CreatePlugin(pluginName);
+        // 创建插件实例 - 使用从文件路径中提取的插件名称
+        std::string actualPluginName = ExtractPluginNameFromPath(pluginPath);
+        m_currentPlugin = m_pluginLoader->CreatePlugin(actualPluginName);
         if (!m_currentPlugin) {
             SetLastError("Failed to create plugin instance: " + m_pluginLoader->GetLastError(), -5);
             return false;
@@ -538,10 +539,23 @@ std::string CameraManager::GetDefaultPluginPath() const {
     if (platform == "Windows") {
         return m_pluginDirectory + "/windows/" + pluginName + ".dll";
     } else if (platform == "Linux") {
-        return m_pluginDirectory + "/linux/" + pluginName + ".so";
+        return m_pluginDirectory + "/linux/lib" + pluginName + ".so";
     }
     
     return "";
+}
+
+std::string CameraManager::ExtractPluginNameFromPath(const std::string& pluginPath) const {
+    std::filesystem::path path(pluginPath);
+    std::string filename = path.filename().string();
+    
+    // 移除扩展名
+    size_t dotPos = filename.find_last_of('.');
+    if (dotPos != std::string::npos) {
+        filename = filename.substr(0, dotPos);
+    }
+    
+    return filename;
 }
 
 std::string CameraManager::GetDefaultPluginName() const {

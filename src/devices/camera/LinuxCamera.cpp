@@ -1,9 +1,11 @@
 #include "devices/camera/LinuxCamera.h"
 #include "utils/Logger.h"
+#include "plugins/CameraManager.h"
 
 namespace AsTestTool {
 
-LinuxCamera::LinuxCamera() {
+LinuxCamera::LinuxCamera() 
+    : m_cameraManager(std::make_unique<Plugins::CameraManager>()) {
     LOG_INFO("LinuxCamera created");
 }
 
@@ -13,6 +15,12 @@ LinuxCamera::~LinuxCamera() {
 
 bool LinuxCamera::Initialize() {
     LOG_INFO("Initializing Linux camera");
+    
+    if (!m_cameraManager->Initialize()) {
+        LOG_ERROR("Failed to initialize camera manager: " + m_cameraManager->GetLastError());
+        return false;
+    }
+    
     m_initialized = true;
     return true;
 }
@@ -50,8 +58,30 @@ bool LinuxCamera::CaptureImage(ImageData& imageData) {
 }
 
 std::vector<CameraInfo> LinuxCamera::GetAvailableCameras() {
+    if (!m_initialized || !m_cameraManager) {
+        LOG_WARNING("Camera not initialized");
+        return {};
+    }
+    
+    // 转换插件CameraInfo到设备CameraInfo
+    std::vector<Plugins::CameraInfo> pluginCameras = m_cameraManager->GetAvailableCameras();
     std::vector<CameraInfo> cameras;
-    // TODO: 实现实际的摄像头枚举逻辑
+    
+    for (const auto& pluginCamera : pluginCameras) {
+        CameraInfo camera;
+        camera.name = pluginCamera.name;
+        camera.devicePath = pluginCamera.devicePath;
+        camera.isAvailable = pluginCamera.isAvailable;
+        
+        // 转换Resolution类型
+        for (const auto& pluginRes : pluginCamera.supportedResolutions) {
+            Resolution res(pluginRes.width, pluginRes.height, pluginRes.fps);
+            camera.supportedResolutions.push_back(res);
+        }
+        
+        cameras.push_back(camera);
+    }
+    
     return cameras;
 }
 

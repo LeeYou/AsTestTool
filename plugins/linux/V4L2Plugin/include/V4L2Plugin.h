@@ -85,6 +85,12 @@ private:
     std::atomic<bool> m_captureRunning;
     std::mutex m_captureMutex;
     
+    // 帧数据管理
+    std::mutex m_frameMutex;
+    int m_latestFrameIndex;
+    size_t m_latestFrameSize;
+    bool m_frameAvailable;
+    
     // 内部方法
     bool InitializeV4L2();
     void CleanupV4L2();
@@ -100,12 +106,25 @@ private:
     
     // 错误处理
     void SetLastError(const std::string& error, int code = -1);
-    std::string GetV4L2Error(int errno) const;
+    std::string GetV4L2Error(int errorCode) const;
     
     // 像素格式转换
     uint32_t PixelFormatToV4L2(PixelFormat format) const;
     PixelFormat V4L2ToPixelFormat(uint32_t v4l2Format) const;
     std::string V4L2FormatToString(uint32_t format) const;
+    
+    // 图像数据处理
+    void ConvertToRGB(uint8_t* inputData, uint8_t* rgbData, int width, int height, PixelFormat format);
+    void ConvertYUV420ToRGB(uint8_t* yuvData, uint8_t* rgbData, int width, int height);
+    void ConvertYUV422ToRGB(uint8_t* yuvData, uint8_t* rgbData, int width, int height);
+    void ConvertRGB24ToRGB24(uint8_t* inputData, uint8_t* rgbData, int width, int height);
+    void ConvertRGB32ToRGB24(uint8_t* rgb32Data, uint8_t* rgb24Data, int width, int height);
+    void GenerateTestPattern(uint8_t* rgbData, int width, int height);
+    void GenerateRealisticCameraImage(uint8_t* rgbData, int width, int height);
+    
+    // 格式检测
+    bool AutoDetectBestFormat();
+    bool TryFormat(PixelFormat format);
     
     // 摄像头枚举
     std::vector<CameraInfo> m_availableCameras;
