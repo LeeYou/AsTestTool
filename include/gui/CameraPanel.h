@@ -85,7 +85,7 @@ private:
     LayoutMode m_layoutMode = LayoutMode::Standard;
     CaptureMode m_captureMode = CaptureMode::Normal;
     
-    Plugins::Resolution m_currentResolution = Plugins::Resolution(1920, 1080);
+    Plugins::Resolution m_currentResolution = Plugins::Resolution(640, 480);
     int m_currentFPS = 30;
     std::string m_currentFormat = "MJPEG";
     

@@ -11,8 +11,8 @@ namespace AsTestTool {
 
 CameraPanel::CameraPanel() {
     LOG_INFO("CameraPanel created");
-    // 初始化默认分辨率
-    m_currentResolution = Plugins::Resolution(1920, 1080);
+    // 初始化默认分辨率 - 使用更通用的分辨率
+    m_currentResolution = Plugins::Resolution(640, 480);
 }
 
 CameraPanel::~CameraPanel() {
@@ -26,21 +26,45 @@ void CameraPanel::Render() {
     UpdateLayout();
     HandleKeyboardShortcuts();
     
-    // 适应新的面板尺寸 - 垂直布局
+    // 适应新的面板尺寸 - 根据布局模式调整
     ImVec2 availableSize = ImGui::GetContentRegionAvail();
     
+    // 根据布局模式和可用空间动态调整各区域高度
+    float controlHeight, infoHeight;
+    float minControlHeight = 120.0f; // 最小控制区域高度，确保所有按钮都能显示
+    
+    switch (m_layoutMode) {
+        case LayoutMode::Compact:
+            controlHeight = std::max(minControlHeight, availableSize.y * 0.25f); // 至少25%高度
+            infoHeight = std::max(100.0f, availableSize.y * 0.25f); // 确保有足够空间显示所有控件
+            break;
+        case LayoutMode::Standard:
+            controlHeight = std::max(minControlHeight, availableSize.y * 0.3f); // 至少30%高度
+            infoHeight = std::max(120.0f, availableSize.y * 0.3f); // 确保有足够空间显示所有控件
+            break;
+        case LayoutMode::Wide:
+            controlHeight = std::max(minControlHeight, availableSize.y * 0.35f); // 至少35%高度
+            infoHeight = std::max(140.0f, availableSize.y * 0.35f); // 确保有足够空间显示所有控件
+            break;
+    }
+    
     // 设备选择和控制区域 - 顶部
-    ImGui::BeginChild("DeviceControls", ImVec2(-1, 120), true);
+    ImGui::BeginChild("DeviceControls", ImVec2(-1, controlHeight), true);
     RenderDeviceControls();
     ImGui::EndChild();
     
     // 预览区域 - 中间主要区域
-    ImGui::BeginChild("PreviewArea", ImVec2(-1, availableSize.y - 180), true, ImGuiWindowFlags_NoScrollbar);
+    // 确保预览区域不会占用过多空间，为ImageInfo区域留出足够空间
+    float previewHeight = availableSize.y - controlHeight - infoHeight;
+    previewHeight = std::max(100.0f, previewHeight); // 最小预览高度
+    previewHeight = std::min(previewHeight, availableSize.y * 0.6f); // 最大不超过60%高度
+    
+    ImGui::BeginChild("PreviewArea", ImVec2(-1, previewHeight), true, ImGuiWindowFlags_NoScrollbar);
     RenderPreviewArea();
     ImGui::EndChild();
     
     // 图像信息 - 底部
-    ImGui::BeginChild("ImageInfo", ImVec2(-1, 60), true);
+    ImGui::BeginChild("ImageInfo", ImVec2(-1, infoHeight), true);
     RenderImageInfo();
     ImGui::EndChild();
 }
@@ -74,123 +98,240 @@ void CameraPanel::HandleKeyboardShortcuts() {
 }
 
 void CameraPanel::RenderDeviceSelection() {
-    ImGui::Text("设备选择");
-    ImGui::SameLine();
+    ImVec2 availableSize = ImGui::GetContentRegionAvail();
+    float availableWidth = availableSize.x;
     
-    // 设备下拉选择
-    if (ImGui::BeginCombo("##device", m_availableCameras.empty() ? "无设备" : m_availableCameras[m_selectedDevice].name.c_str())) {
-        for (int i = 0; i < m_availableCameras.size(); i++) {
-            bool isSelected = (m_selectedDevice == i);
-            if (ImGui::Selectable(m_availableCameras[i].name.c_str(), isSelected)) {
-                m_selectedDevice = i;
+    // 根据可用宽度决定布局策略
+    bool useCompactLayout = (availableWidth < 400);
+    
+    if (useCompactLayout) {
+        // 紧凑布局：垂直排列
+        ImGui::Text("设备选择:");
+        
+        // 设备下拉选择
+        if (ImGui::BeginCombo("##device", m_availableCameras.empty() ? "无设备" : m_availableCameras[m_selectedDevice].name.c_str())) {
+            for (int i = 0; i < m_availableCameras.size(); i++) {
+                bool isSelected = (m_selectedDevice == i);
+                if (ImGui::Selectable(m_availableCameras[i].name.c_str(), isSelected)) {
+                    m_selectedDevice = i;
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
-            if (isSelected) {
-                ImGui::SetItemDefaultFocus();
-            }
+            ImGui::EndCombo();
         }
-        ImGui::EndCombo();
-    }
-    
-    ImGui::SameLine();
-    
-    // 连接状态指示
-    ImVec4 statusColor = m_connected ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-    ImGui::TextColored(statusColor, m_connected ? "● 已连接" : "● 未连接");
-    
-    // 换行显示操作按钮
-    ImGui::NewLine();
-    ImGui::Text("操作:");
-    ImGui::SameLine();
-    
-    // 刷新设备列表按钮
-    if (ImGui::Button("刷新设备", ImVec2(80, 25))) {
-        RefreshDeviceList();
-    }
-    
-    ImGui::SameLine();
-    
-    // 连接/断开按钮
-    if (m_connected) {
-        if (ImGui::Button("断开连接", ImVec2(80, 25))) {
-            LOG_INFO("Disconnecting camera...");
-            StopPreview();
-            if (m_cameraManager) {
-                m_cameraManager->CloseCamera();
-            }
-            m_connected = false;
-            LOG_INFO("Camera disconnected");
+        
+        // 连接状态指示
+        ImVec4 statusColor = m_connected ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+        ImGui::TextColored(statusColor, m_connected ? "● 已连接" : "● 未连接");
+        
+        // 操作按钮 - 水平排列但较小
+        float buttonWidth = std::min(70.0f, (availableWidth - 20) / 2.0f);
+        buttonWidth = std::max(60.0f, buttonWidth);
+        
+        if (ImGui::Button("刷新设备", ImVec2(buttonWidth, 25))) {
+            RefreshDeviceList();
         }
-    } else {
-        if (ImGui::Button("连接设备", ImVec2(80, 25))) {
-            LOG_INFO("Connecting to camera...");
-            if (m_cameraManager && m_cameraManager->Initialize()) {
-                // 获取可用摄像头
-                auto cameras = m_cameraManager->GetAvailableCameras();
-                if (!cameras.empty() && m_selectedDevice < cameras.size()) {
-                    // 打开选中的摄像头
-                    if (m_cameraManager->OpenCamera(cameras[m_selectedDevice].id)) {
-                        m_connected = true;
-                        LOG_INFO("Camera connected successfully: " + cameras[m_selectedDevice].name);
-                        StartPreview();
+        
+        ImGui::SameLine();
+        
+        if (m_connected) {
+            if (ImGui::Button("断开连接", ImVec2(buttonWidth, 25))) {
+                LOG_INFO("Disconnecting camera...");
+                StopPreview();
+                if (m_cameraManager) {
+                    m_cameraManager->CloseCamera();
+                }
+                m_connected = false;
+                LOG_INFO("Camera disconnected");
+            }
+        } else {
+            if (ImGui::Button("连接设备", ImVec2(buttonWidth, 25))) {
+                LOG_INFO("Connecting to camera...");
+                if (m_cameraManager && m_cameraManager->Initialize()) {
+                    auto cameras = m_cameraManager->GetAvailableCameras();
+                    if (!cameras.empty() && m_selectedDevice < cameras.size()) {
+                        if (m_cameraManager->OpenCamera(cameras[m_selectedDevice].id)) {
+                            m_connected = true;
+                            LOG_INFO("Camera connected successfully: " + cameras[m_selectedDevice].name);
+                            StartPreview();
+                        } else {
+                            LOG_ERROR("Failed to open camera: " + cameras[m_selectedDevice].name);
+                        }
                     } else {
-                        LOG_ERROR("Failed to open camera: " + cameras[m_selectedDevice].name);
+                        LOG_ERROR("No camera selected or available");
                     }
                 } else {
-                    LOG_ERROR("No camera selected or available");
+                    LOG_ERROR("Failed to initialize camera manager");
                 }
-            } else {
-                LOG_ERROR("Failed to initialize camera manager");
+            }
+        }
+    } else {
+        // 标准布局：水平排列
+        ImGui::Text("设备选择");
+        ImGui::SameLine();
+        
+        // 设备下拉选择
+        if (ImGui::BeginCombo("##device", m_availableCameras.empty() ? "无设备" : m_availableCameras[m_selectedDevice].name.c_str())) {
+            for (int i = 0; i < m_availableCameras.size(); i++) {
+                bool isSelected = (m_selectedDevice == i);
+                if (ImGui::Selectable(m_availableCameras[i].name.c_str(), isSelected)) {
+                    m_selectedDevice = i;
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        
+        ImGui::SameLine();
+        
+        // 连接状态指示
+        ImVec4 statusColor = m_connected ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+        ImGui::TextColored(statusColor, m_connected ? "● 已连接" : "● 未连接");
+        
+        // 换行显示操作按钮
+        ImGui::NewLine();
+        ImGui::Text("操作:");
+        ImGui::SameLine();
+        
+        // 刷新设备列表按钮
+        if (ImGui::Button("刷新设备", ImVec2(80, 25))) {
+            RefreshDeviceList();
+        }
+        
+        ImGui::SameLine();
+        
+        // 连接/断开按钮
+        if (m_connected) {
+            if (ImGui::Button("断开连接", ImVec2(80, 25))) {
+                LOG_INFO("Disconnecting camera...");
+                StopPreview();
+                if (m_cameraManager) {
+                    m_cameraManager->CloseCamera();
+                }
+                m_connected = false;
+                LOG_INFO("Camera disconnected");
+            }
+        } else {
+            if (ImGui::Button("连接设备", ImVec2(80, 25))) {
+                LOG_INFO("Connecting to camera...");
+                if (m_cameraManager && m_cameraManager->Initialize()) {
+                    auto cameras = m_cameraManager->GetAvailableCameras();
+                    if (!cameras.empty() && m_selectedDevice < cameras.size()) {
+                        if (m_cameraManager->OpenCamera(cameras[m_selectedDevice].id)) {
+                            m_connected = true;
+                            LOG_INFO("Camera connected successfully: " + cameras[m_selectedDevice].name);
+                            StartPreview();
+                        } else {
+                            LOG_ERROR("Failed to open camera: " + cameras[m_selectedDevice].name);
+                        }
+                    } else {
+                        LOG_ERROR("No camera selected or available");
+                    }
+                } else {
+                    LOG_ERROR("Failed to initialize camera manager");
+                }
             }
         }
     }
 }
 
 void CameraPanel::RenderDeviceControls() {
+    ImVec2 availableSize = ImGui::GetContentRegionAvail();
+    float availableWidth = availableSize.x;
+    float availableHeight = availableSize.y;
+    
+    // 根据可用空间决定布局策略
+    bool useVerticalLayout = (availableWidth < 400 || availableHeight < 100);
+    bool useCompactButtons = (availableWidth < 500);
+    
     // 第一行：设备选择
     RenderDeviceSelection();
     
     ImGui::Separator();
     
-    // 第二行：主要控制按钮 - 使用更紧凑的布局
+    // 主要操作按钮区域
     ImGui::Text("主要操作:");
     
-    // 计算可用宽度并调整按钮大小
-    float availableWidth = ImGui::GetContentRegionAvail().x;
-    float buttonWidth = std::min(80.0f, (availableWidth - 200) / 4.0f); // 为分辨率选择留出空间
-    buttonWidth = std::max(60.0f, buttonWidth); // 最小宽度
-    
-    // 大号拍照按钮
-    if (ImGui::Button("📷 拍照", ImVec2(buttonWidth, 35))) {
-        LOG_INFO("Capture button clicked");
-        CaptureImage();
-    }
-    ImGui::SameLine();
-    
-    // 录像按钮
-    if (ImGui::Button("🎥 录像", ImVec2(buttonWidth, 35))) {
-        LOG_INFO("Record button clicked");
-        ToggleRecording();
-    }
-    ImGui::SameLine();
-    
-    // 预览控制
-    if (m_previewActive) {
-        if (ImGui::Button("⏹ 停止预览", ImVec2(buttonWidth + 20, 35))) {
-            LOG_INFO("Stop preview button clicked");
-            StopPreview();
+    if (useVerticalLayout) {
+        // 垂直布局：按钮垂直排列
+        float buttonWidth = std::min(120.0f, availableWidth * 0.8f);
+        float buttonHeight = 30.0f;
+        
+        // 第一行按钮
+        if (ImGui::Button("📷 拍照", ImVec2(buttonWidth, buttonHeight))) {
+            LOG_INFO("Capture button clicked");
+            CaptureImage();
+        }
+        
+        if (ImGui::Button("🎥 录像", ImVec2(buttonWidth, buttonHeight))) {
+            LOG_INFO("Record button clicked");
+            ToggleRecording();
+        }
+        
+        // 预览控制按钮
+        if (m_previewActive) {
+            if (ImGui::Button("⏹ 停止预览", ImVec2(buttonWidth, buttonHeight))) {
+                LOG_INFO("Stop preview button clicked");
+                StopPreview();
+            }
+        } else {
+            if (ImGui::Button("▶ 开始预览", ImVec2(buttonWidth, buttonHeight))) {
+                LOG_INFO("Start preview button clicked");
+                StartPreview();
+            }
         }
     } else {
-        if (ImGui::Button("▶ 开始预览", ImVec2(buttonWidth + 20, 35))) {
-            LOG_INFO("Start preview button clicked");
-            StartPreview();
+        // 水平布局：按钮水平排列
+        float buttonWidth;
+        if (useCompactButtons) {
+            // 紧凑模式：较小的按钮
+            buttonWidth = std::min(70.0f, (availableWidth - 50) / 3.0f);
+        } else {
+            // 标准模式：较大的按钮
+            buttonWidth = std::min(100.0f, (availableWidth - 100) / 3.0f);
+        }
+        buttonWidth = std::max(60.0f, buttonWidth); // 最小宽度
+        float buttonHeight = useCompactButtons ? 30.0f : 35.0f;
+        
+        // 拍照按钮
+        if (ImGui::Button("📷 拍照", ImVec2(buttonWidth, buttonHeight))) {
+            LOG_INFO("Capture button clicked");
+            CaptureImage();
+        }
+        ImGui::SameLine();
+        
+        // 录像按钮
+        if (ImGui::Button("🎥 录像", ImVec2(buttonWidth, buttonHeight))) {
+            LOG_INFO("Record button clicked");
+            ToggleRecording();
+        }
+        ImGui::SameLine();
+        
+        // 预览控制按钮
+        if (m_previewActive) {
+            if (ImGui::Button("⏹ 停止预览", ImVec2(buttonWidth + 10, buttonHeight))) {
+                LOG_INFO("Stop preview button clicked");
+                StopPreview();
+            }
+        } else {
+            if (ImGui::Button("▶ 开始预览", ImVec2(buttonWidth + 10, buttonHeight))) {
+                LOG_INFO("Start preview button clicked");
+                StartPreview();
+            }
         }
     }
     
-    // 第三行：分辨率选择 - 单独一行
-    ImGui::NewLine();
-    ImGui::Text("分辨率:");
-    ImGui::SameLine();
-    RenderResolutionSelector();
+    // 分辨率选择区域
+    if (availableHeight > 60) { // 只有在有足够高度时才显示分辨率选择
+        ImGui::NewLine();
+        ImGui::Text("分辨率:");
+        ImGui::SameLine();
+        RenderResolutionSelector();
+    }
 }
 
 void CameraPanel::RenderPreviewArea() {
@@ -278,23 +419,7 @@ void CameraPanel::RenderPreviewArea() {
             // 绘制边框
             drawList->AddRect(imageStart, imageEnd, IM_COL32(255, 255, 255, 255), 0.0f, 0, 2.0f);
             
-            // 绘制信息覆盖层
-            ImVec2 infoStart = ImVec2(imageStart.x, imageStart.y);
-            ImVec2 infoEnd = ImVec2(imageEnd.x, imageStart.y + 30);
-            drawList->AddRectFilled(infoStart, infoEnd, IM_COL32(0, 0, 0, 128));
-            
-            // 绘制分辨率信息
-            std::string resText = std::to_string(m_imageWidth) + "x" + std::to_string(m_imageHeight);
-            ImVec2 textPos = ImVec2(imageStart.x + 10, imageStart.y + 8);
-            drawList->AddText(textPos, IM_COL32(255, 255, 255, 255), resText.c_str());
-            
-            // 绘制时间戳
-            auto now = std::chrono::system_clock::now();
-            auto time_t = std::chrono::system_clock::to_time_t(now);
-            std::stringstream ss;
-            ss << std::put_time(std::localtime(&time_t), "%H:%M:%S");
-            ImVec2 timePos = ImVec2(imageEnd.x - 80, imageStart.y + 8);
-            drawList->AddText(timePos, IM_COL32(255, 255, 255, 255), ss.str().c_str());
+            // 移除信息覆盖层，避免与ImageInfo区域重复显示
         } else {
             // 没有图像数据时显示占位符
             ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -309,17 +434,21 @@ void CameraPanel::RenderPreviewArea() {
             // 绘制摄像头图标和状态文本
             ImVec2 center = ImVec2((previewStart.x + previewEnd.x) * 0.5f, (previewStart.y + previewEnd.y) * 0.5f);
             
-            // 摄像头图标
-            ImVec2 iconPos = ImVec2(center.x - 20, center.y - 30);
-            drawList->AddText(iconPos, IM_COL32(150, 150, 150, 255), "📷");
+            // 摄像头图标（更大更清晰）
+            ImVec2 iconPos = ImVec2(center.x - 30, center.y - 50);
+            drawList->AddText(iconPos, IM_COL32(120, 120, 120, 255), "📷");
             
-            // 状态文本
-            ImVec2 textPos = ImVec2(center.x - 80, center.y + 10);
-            drawList->AddText(textPos, IM_COL32(200, 200, 200, 255), "正在获取图像...");
+            // 状态文本（更清晰的层次）
+            ImVec2 textPos = ImVec2(center.x - 60, center.y + 5);
+            drawList->AddText(textPos, IM_COL32(180, 180, 180, 255), "正在获取图像...");
             
-            // 提示文本
-            ImVec2 hintPos = ImVec2(center.x - 100, center.y + 30);
+            // 提示文本（更友好的提示）
+            ImVec2 hintPos = ImVec2(center.x - 90, center.y + 25);
             drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "请稍候，正在连接摄像头");
+            
+            // 添加加载指示器
+            ImVec2 loadingPos = ImVec2(center.x - 10, center.y + 45);
+            drawList->AddText(loadingPos, IM_COL32(100, 150, 200, 255), "● 连接中");
         }
         
         // 创建一个透明的ImGui区域用于交互
@@ -338,22 +467,30 @@ void CameraPanel::RenderPreviewArea() {
         // 绘制中心内容
         ImVec2 center = ImVec2((previewStart.x + previewEnd.x) * 0.5f, (previewStart.y + previewEnd.y) * 0.5f);
         
-        // 摄像头图标
-        ImVec2 iconPos = ImVec2(center.x - 25, center.y - 40);
-        drawList->AddText(iconPos, IM_COL32(100, 100, 100, 255), "📷");
+        // 摄像头图标（更大更清晰）
+        ImVec2 iconPos = ImVec2(center.x - 30, center.y - 50);
+        drawList->AddText(iconPos, IM_COL32(80, 80, 80, 255), "📷");
         
-        // 状态文本
+        // 状态文本（更清晰的层次）
         if (!m_previewActive) {
-            ImVec2 textPos = ImVec2(center.x - 60, center.y + 10);
-            drawList->AddText(textPos, IM_COL32(180, 180, 180, 255), "预览区域");
+            ImVec2 textPos = ImVec2(center.x - 50, center.y + 5);
+            drawList->AddText(textPos, IM_COL32(160, 160, 160, 255), "摄像头预览");
             
-            ImVec2 hintPos = ImVec2(center.x - 100, center.y + 30);
-            drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "点击 [开始预览] 按钮");
+            ImVec2 hintPos = ImVec2(center.x - 80, center.y + 25);
+            drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "点击 [开始预览] 按钮开始");
+            
+            // 添加连接状态指示器
+            ImVec2 statusPos = ImVec2(center.x - 20, center.y + 45);
+            if (m_connected) {
+                drawList->AddText(statusPos, IM_COL32(100, 200, 100, 255), "● 已连接");
+            } else {
+                drawList->AddText(statusPos, IM_COL32(200, 100, 100, 255), "● 未连接");
+            }
         } else if (!m_connected) {
-            ImVec2 textPos = ImVec2(center.x - 80, center.y + 10);
+            ImVec2 textPos = ImVec2(center.x - 60, center.y + 5);
             drawList->AddText(textPos, IM_COL32(200, 100, 100, 255), "设备未连接");
             
-            ImVec2 hintPos = ImVec2(center.x - 100, center.y + 30);
+            ImVec2 hintPos = ImVec2(center.x - 100, center.y + 25);
             drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "请先选择并连接摄像头设备");
         }
         
@@ -374,34 +511,7 @@ void CameraPanel::RenderPreviewArea() {
         RenderGridLines(centerPos, previewSize);
     }
     
-    // 在预览区域下方显示简化的控制选项
-    ImGui::SetCursorPos(ImVec2(0, centerPos.y + previewSize.y + 10));
-    
-    // 画质调节（简化版）
-    ImGui::Text("画质调节:");
-    ImGui::SameLine();
-    if (ImGui::SliderInt("亮度", &m_brightness, 0, 100)) {
-        if (m_cameraManager) {
-            m_cameraManager->SetBrightness(m_brightness);
-        }
-    }
-    ImGui::SameLine();
-    if (ImGui::SliderInt("对比度", &m_contrast, 0, 100)) {
-        if (m_cameraManager) {
-            m_cameraManager->SetContrast(m_contrast);
-        }
-    }
-    
-    // 拍摄模式（简化版）
-    ImGui::Text("拍摄模式:");
-    ImGui::SameLine();
-    const char* modes[] = { "普通", "文档", "身份证", "A4" };
-    int mode = static_cast<int>(m_captureMode);
-    if (ImGui::Combo("##mode", &mode, modes, IM_ARRAYSIZE(modes))) {
-        m_captureMode = static_cast<CaptureMode>(mode);
-    }
-    ImGui::SameLine();
-    ImGui::Checkbox("网格线", &m_showGridLines);
+    // 移除这些控件，它们将被移到ImageInfo区域
 }
 
 void CameraPanel::RenderControlPanel() {
@@ -517,40 +627,111 @@ void CameraPanel::RenderImageEnhancement() {
 }
 
 void CameraPanel::RenderPreviewOverlay() {
-    // 在预览区域右上角显示信息
-    ImVec2 overlayPos = ImVec2(ImGui::GetWindowWidth() - 200, 10);
-    ImGui::SetCursorPos(overlayPos);
-    
-    ImGui::BeginChild("InfoOverlay", ImVec2(190, 80), true, ImGuiWindowFlags_NoScrollbar);
-    ImGui::Text("分辨率: %dx%d", m_currentResolution.width, m_currentResolution.height);
-    ImGui::Text("帧率: %d fps", m_currentFPS);
-    ImGui::Text("格式: %s", m_currentFormat.c_str());
-    ImGui::EndChild();
+    // 移除预览区域的信息覆盖层，避免与占位背景图重叠
 }
 
 void CameraPanel::RenderImageInfo() {
+    ImVec2 availableSize = ImGui::GetContentRegionAvail();
+    float availableHeight = availableSize.y;
+    
+    // 根据可用高度决定布局策略
+    bool useCompactLayout = (availableHeight < 100);
+    bool useVerticalLayout = (availableSize.x < 400);
+    
     ImGui::Text("图像信息");
     ImGui::Separator();
     
-    ImGui::Text("分辨率: %dx%d", m_currentResolution.width, m_currentResolution.height);
+    // 显示实际检测到的分辨率，而不是硬编码值
+    if (m_connected && m_hasImageData && m_imageWidth > 0 && m_imageHeight > 0) {
+        ImGui::Text("分辨率: %dx%d", m_imageWidth, m_imageHeight);
+    } else if (m_connected) {
+        ImGui::Text("分辨率: %dx%d", m_currentResolution.width, m_currentResolution.height);
+    } else {
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "分辨率: 未检测");
+    }
+    
     ImGui::SameLine();
     ImGui::Text("帧率: %d fps", m_currentFPS);
     ImGui::SameLine();
     ImGui::Text("格式: %s", m_currentFormat.c_str());
     ImGui::SameLine();
     ImGui::Text("状态: %s", m_previewActive ? "预览中" : "已停止");
+    
+    // 只有在有足够空间时才显示额外的控件
+    if (availableHeight > 60) {
+        ImGui::Separator();
+        
+        if (useCompactLayout) {
+            // 紧凑布局：垂直排列
+            ImGui::Text("画质调节:");
+            if (ImGui::SliderInt("亮度", &m_brightness, 0, 100)) {
+                if (m_cameraManager) {
+                    m_cameraManager->SetBrightness(m_brightness);
+                }
+            }
+            if (ImGui::SliderInt("对比度", &m_contrast, 0, 100)) {
+                if (m_cameraManager) {
+                    m_cameraManager->SetContrast(m_contrast);
+                }
+            }
+            
+            ImGui::Text("拍摄模式:");
+            const char* modes[] = { "普通", "文档", "身份证", "A4" };
+            int mode = static_cast<int>(m_captureMode);
+            if (ImGui::Combo("##mode", &mode, modes, IM_ARRAYSIZE(modes))) {
+                m_captureMode = static_cast<CaptureMode>(mode);
+            }
+            ImGui::SameLine();
+            ImGui::Checkbox("网格线", &m_showGridLines);
+        } else {
+            // 标准布局：水平排列
+            // 画质调节（简化版）
+            ImGui::Text("画质调节:");
+            ImGui::SameLine();
+            if (ImGui::SliderInt("亮度", &m_brightness, 0, 100)) {
+                if (m_cameraManager) {
+                    m_cameraManager->SetBrightness(m_brightness);
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::SliderInt("对比度", &m_contrast, 0, 100)) {
+                if (m_cameraManager) {
+                    m_cameraManager->SetContrast(m_contrast);
+                }
+            }
+            
+            // 拍摄模式（简化版）
+            ImGui::Text("拍摄模式:");
+            ImGui::SameLine();
+            const char* modes[] = { "普通", "文档", "身份证", "A4" };
+            int mode = static_cast<int>(m_captureMode);
+            if (ImGui::Combo("##mode", &mode, modes, IM_ARRAYSIZE(modes))) {
+                m_captureMode = static_cast<CaptureMode>(mode);
+            }
+            ImGui::SameLine();
+            ImGui::Checkbox("网格线", &m_showGridLines);
+        }
+    }
 }
 
 void CameraPanel::UpdateLayout() {
     ImVec2 windowSize = ImGui::GetWindowSize();
     
-    // 根据窗口大小调整布局
-    if (windowSize.x < 800) {
-        m_layoutMode = LayoutMode::Compact;
-    } else if (windowSize.x < 1200) {
-        m_layoutMode = LayoutMode::Standard;
+    // 根据窗口大小调整布局 - 更精细的断点控制
+    if (windowSize.x < 400) {
+        m_layoutMode = LayoutMode::Compact;  // 超紧凑模式
+    } else if (windowSize.x < 600) {
+        m_layoutMode = LayoutMode::Compact;  // 紧凑模式
+    } else if (windowSize.x < 1000) {
+        m_layoutMode = LayoutMode::Standard; // 标准模式
     } else {
-        m_layoutMode = LayoutMode::Wide;
+        m_layoutMode = LayoutMode::Wide;     // 宽屏模式
+    }
+    
+    // 根据高度调整垂直布局
+    if (windowSize.y < 300) {
+        // 高度不足时，减少控制区域高度
+        m_layoutMode = LayoutMode::Compact;
     }
 }
 

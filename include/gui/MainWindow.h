@@ -55,6 +55,14 @@ private:
     void RenderStatusBar();
     void RenderDebugInfo();
     void InitializeDevices();
+    
+    // 设备状态管理
+    struct DeviceStatus {
+        bool idCardConnected = false;
+        bool cameraConnected = false;
+        bool signatureConnected = false;
+    };
+    DeviceStatus GetDeviceStatus() const;
 
     bool m_initialized = false;
     std::unique_ptr<IDCardPanel> m_idCardPanel;
