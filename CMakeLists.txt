@@ -212,11 +212,35 @@ endif()
 # 安装规则
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION bin
+    COMPONENT applications
 )
 
-# 安装资源文件
-install(DIRECTORY resources/
-    DESTINATION share/${PROJECT_NAME}/resources
+# 安装插件
+install(DIRECTORY ${CMAKE_BINARY_DIR}/plugins/
+    DESTINATION bin/plugins
+    COMPONENT applications
+    FILES_MATCHING PATTERN "*.dll" PATTERN "*.so"
+)
+
+# 安装资源文件（如果存在）
+if(EXISTS ${CMAKE_SOURCE_DIR}/resources)
+    install(DIRECTORY resources/
+        DESTINATION share/${PROJECT_NAME}/resources
+        COMPONENT applications
+    )
+endif()
+
+# 安装配置文件
+install(FILES README.md
+    DESTINATION share/${PROJECT_NAME}
+    COMPONENT applications
+)
+
+# 安装许可证
+install(FILES LICENSE
+    DESTINATION share/${PROJECT_NAME}
+    COMPONENT applications
+    OPTIONAL
 )
 
 # 测试
@@ -237,3 +261,91 @@ if(BUILD_DOCS)
         )
     endif()
 endif()
+
+# CPack 配置
+include(CPack)
+
+# 设置包信息
+set(CPACK_PACKAGE_NAME "AsTestTool")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "跨平台设备测试工具")
+set(CPACK_PACKAGE_VENDOR "AsTestTool Team")
+set(CPACK_PACKAGE_CONTACT "support@astesttool.com")
+
+# 设置包文件
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+
+# Windows 特定配置
+if(WIN32)
+    # 使用 NSIS 生成器
+    set(CPACK_GENERATOR "NSIS")
+    
+    # NSIS 特定设置
+    set(CPACK_NSIS_DISPLAY_NAME "AsTestTool")
+    set(CPACK_NSIS_PACKAGE_NAME "AsTestTool")
+    set(CPACK_NSIS_CONTACT "support@astesttool.com")
+    set(CPACK_NSIS_URL_INFO_ABOUT "https://github.com/astesttool/astesttool")
+    set(CPACK_NSIS_HELP_LINK "https://github.com/astesttool/astesttool/wiki")
+    set(CPACK_NSIS_URL_INFO_ABOUT "https://github.com/astesttool/astesttool")
+    set(CPACK_NSIS_MODIFY_PATH ON)
+    
+    # 设置安装组件
+    set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "AsTestTool Application")
+    set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION "AsTestTool 主程序")
+    set(CPACK_COMPONENT_APPLICATIONS_REQUIRED ON)
+    
+    # 设置安装目录
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "AsTestTool")
+    
+    # 包含运行时库
+    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/resources/icons/app.ico")
+    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/resources/icons/app.ico")
+    
+    # 创建桌面快捷方式
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA
+        "CreateShortCut '$DESKTOP\\\\AsTestTool.lnk' '$INSTDIR\\\\bin\\\\AsTestTool.exe'"
+    )
+    set(CPACK_NSIS_DELETE_ICONS_EXTRA
+        "Delete '$DESKTOP\\\\AsTestTool.lnk'"
+    )
+    
+    # 创建开始菜单快捷方式
+    set(CPACK_NSIS_MENU_LINKS
+        "bin/AsTestTool.exe" "AsTestTool"
+    )
+    
+elseif(UNIX AND NOT APPLE)
+    # Linux 特定配置
+    set(CPACK_GENERATOR "TGZ;DEB;RPM")
+    
+    # DEB 包配置
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "AsTestTool Team <support@astesttool.com>")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libstdc++6, libgl1-mesa-glx")
+    
+    # RPM 包配置
+    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+    set(CPACK_RPM_PACKAGE_GROUP "Applications/System")
+    set(CPACK_RPM_PACKAGE_REQUIRES "glibc, libstdc++, mesa-libGL")
+    
+elseif(APPLE)
+    # macOS 特定配置
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_DMG_VOLUME_NAME "AsTestTool")
+    set(CPACK_DMG_FORMAT "UDZO")
+    set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/resources/icons/dmg_background.png")
+endif()
+
+# 设置安装组件
+set(CPACK_COMPONENTS_ALL applications)
+
+# 设置安装路径
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "AsTestTool")
+
+# 包含所有文件
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+
+# 设置压缩选项
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
