@@ -24,21 +24,16 @@ bool WindowsIDCardReader::Initialize() {
     }
     
     // 尝试加载系统目录下的默认DLL
-    std::vector<std::string> defaultPaths = {
-        "cmcc_idcard.dll",  // 当前目录
-        "C:\\Windows\\System32\\cmcc_idcard.dll",  // System32目录
-        "C:\\Windows\\SysWOW64\\cmcc_idcard.dll",  // SysWOW64目录（32位程序）
-        "C:\\Program Files\\Common Files\\cmcc_idcard.dll",  // 通用文件目录
-        "C:\\Program Files (x86)\\Common Files\\cmcc_idcard.dll"  // 32位通用文件目录
-    };
+    // 使用系统DLL搜索路径，让Windows自动查找
+    std::string defaultLibrary = "CMCC_IDCARD.DLL";
+    LOG_INFO("Trying to load system library: " + defaultLibrary);
     
     bool loaded = false;
-    for (const auto& path : defaultPaths) {
-        if (LoadLibrary(path)) {
-            LOG_INFO("Successfully loaded ID card reader library from: " + path);
-            loaded = true;
-            break;
-        }
+    if (LoadLibrary(defaultLibrary)) {
+        LOG_INFO("Successfully loaded ID card reader library from system: " + defaultLibrary);
+        loaded = true;
+    } else {
+        LOG_WARNING("Failed to load system library: " + defaultLibrary);
     }
     
     if (!loaded) {

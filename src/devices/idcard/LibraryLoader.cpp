@@ -25,7 +25,21 @@ bool LibraryLoader::LoadDynamicLibrary(const std::string& path) {
 #ifdef _WIN32
     m_handle = ::LoadLibraryA(path.c_str());
     if (!m_handle) {
-        LOG_ERROR("Failed to load library: " + path);
+        DWORD error = GetLastError();
+        LOG_ERROR("Failed to load library: " + path + ", error code: " + std::to_string(error));
+        
+        // 获取详细的错误信息
+        LPVOID lpMsgBuf;
+        FormatMessageA(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPSTR)&lpMsgBuf, 0, NULL);
+        
+        if (lpMsgBuf) {
+            LOG_ERROR("Error details: " + std::string((char*)lpMsgBuf));
+            LocalFree(lpMsgBuf);
+        }
+        
         return false;
     }
 #else

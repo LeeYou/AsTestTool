@@ -18,21 +18,16 @@ bool WindowsSignaturePad::Initialize() {
     LOG_INFO("Initializing Windows signature pad");
     
     // 尝试加载系统目录下的默认DLL
-    std::vector<std::string> defaultPaths = {
-        "cmcc_sign.dll",  // 当前目录
-        "C:\\Windows\\System32\\cmcc_sign.dll",  // System32目录
-        "C:\\Windows\\SysWOW64\\cmcc_sign.dll",  // SysWOW64目录（32位程序）
-        "C:\\Program Files\\Common Files\\cmcc_sign.dll",  // 通用文件目录
-        "C:\\Program Files (x86)\\Common Files\\cmcc_sign.dll"  // 32位通用文件目录
-    };
+    // 使用系统DLL搜索路径，让Windows自动查找
+    std::string defaultLibrary = "CMCC_SIGN.DLL";
+    LOG_INFO("Trying to load system library: " + defaultLibrary);
     
     bool loaded = false;
-    for (const auto& path : defaultPaths) {
-        if (LoadLibrary(path)) {
-            LOG_INFO("Successfully loaded signature pad library from: " + path);
-            loaded = true;
-            break;
-        }
+    if (LoadLibrary(defaultLibrary)) {
+        LOG_INFO("Successfully loaded signature pad library from system: " + defaultLibrary);
+        loaded = true;
+    } else {
+        LOG_WARNING("Failed to load system library: " + defaultLibrary);
     }
     
     if (!loaded) {
@@ -181,10 +176,29 @@ bool WindowsSignaturePad::LoadLibrary(const std::string& libraryPath) {
     }
     
     // 解析函数指针
+    LOG_INFO("Loading function: OpenDevice");
     m_openDeviceFunc = (OpenDeviceFunc)m_libraryLoader->GetFunction("OpenDevice");
+    if (!m_openDeviceFunc) {
+        LOG_ERROR("Failed to load function: OpenDevice");
+    }
+    
+    LOG_INFO("Loading function: getDeviceInfo");
     m_getDeviceInfoFunc = (GetDeviceInfoFunc)m_libraryLoader->GetFunction("getDeviceInfo");
+    if (!m_getDeviceInfoFunc) {
+        LOG_ERROR("Failed to load function: getDeviceInfo");
+    }
+    
+    LOG_INFO("Loading function: getPackets");
     m_getPacketsFunc = (GetPacketsFunc)m_libraryLoader->GetFunction("getPackets");
+    if (!m_getPacketsFunc) {
+        LOG_ERROR("Failed to load function: getPackets");
+    }
+    
+    LOG_INFO("Loading function: getGesture");
     m_getGestureFunc = (GetGestureFunc)m_libraryLoader->GetFunction("getGesture");
+    if (!m_getGestureFunc) {
+        LOG_ERROR("Failed to load function: getGesture");
+    }
     
     if (!m_openDeviceFunc || !m_getDeviceInfoFunc || !m_getPacketsFunc) {
         LOG_ERROR("Failed to load required functions from library");

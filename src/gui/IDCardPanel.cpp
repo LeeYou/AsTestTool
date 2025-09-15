@@ -189,11 +189,10 @@ void IDCardPanel::RenderLibrarySettings() {
         ImGui::Separator();
         
         // 显示默认路径信息
-        ImGui::Text("默认搜索路径:");
-        ImGui::BulletText("当前目录: cmcc_idcard.dll");
-        ImGui::BulletText("系统目录: C:\\Windows\\System32\\cmcc_idcard.dll");
-        ImGui::BulletText("32位系统目录: C:\\Windows\\SysWOW64\\cmcc_idcard.dll");
-        ImGui::BulletText("通用文件目录: C:\\Program Files\\Common Files\\cmcc_idcard.dll");
+        ImGui::Text("默认加载:");
+        ImGui::BulletText("系统DLL: CMCC_IDCARD.DLL");
+        ImGui::BulletText("Windows会自动在系统目录中查找");
+        ImGui::BulletText("包括: System32, SysWOW64, PATH环境变量等");
         
         ImGui::Separator();
         

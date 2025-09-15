@@ -80,7 +80,11 @@ void MainWindow::InitializeDevices() {
     // 创建手写屏设备
     m_signaturePad = DeviceFactory::CreateSignaturePad("default");
     if (m_signaturePad) {
-        LOG_INFO("Signature Pad device created successfully");
+        if (m_signaturePad->Initialize()) {
+            LOG_INFO("Signature Pad device created and initialized successfully");
+        } else {
+            LOG_WARNING("Failed to initialize Signature Pad device");
+        }
     } else {
         LOG_WARNING("Failed to create Signature Pad device");
     }
