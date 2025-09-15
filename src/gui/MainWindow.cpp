@@ -33,8 +33,18 @@ bool MainWindow::Initialize() {
     m_signaturePanel = std::make_unique<SignaturePanel>();
     
     // 设置设备到面板
+    if (m_idCardReader) {
+        m_idCardPanel->SetIDCardReader(m_idCardReader);
+    }
+    
+    // 设置设备到面板
     if (m_cameraManager) {
         m_cameraPanel->SetCameraManager(m_cameraManager);
+    }
+    
+    // 设置设备到面板
+    if (m_signaturePad) {
+        m_signaturePanel->SetSignaturePad(m_signaturePad);
     }
     
     // 应用亮色主题
@@ -58,7 +68,11 @@ void MainWindow::InitializeDevices() {
     // 创建身份证阅读器设备
     m_idCardReader = DeviceFactory::CreateIDCardReader("default");
     if (m_idCardReader) {
-        LOG_INFO("ID Card Reader device created successfully");
+        if (m_idCardReader->Initialize()) {
+            LOG_INFO("ID Card Reader device created and initialized successfully");
+        } else {
+            LOG_WARNING("Failed to initialize ID Card Reader device");
+        }
     } else {
         LOG_WARNING("Failed to create ID Card Reader device");
     }
