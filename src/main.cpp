@@ -23,15 +23,17 @@ int main(int argc, char* argv[]) {
         
         LOG_INFO("=== AsTestTool Starting ===");
         LOG_INFO("Version: 1.0.0");
-        LOG_INFO("Platform: " + 
+        
+        // 获取平台信息
+        std::string platformName;
 #ifdef PLATFORM_WINDOWS
-            std::string("Windows")
+        platformName = "Windows";
 #elif PLATFORM_LINUX
-            std::string("Linux")
+        platformName = "Linux";
 #else
-            std::string("Unknown")
+        platformName = "Unknown";
 #endif
-        );
+        LOG_INFO("Platform: " + platformName);
 
         // 创建并初始化应用程序
         AsTestTool::Application app;

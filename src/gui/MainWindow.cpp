@@ -7,6 +7,7 @@
 #include "gui/Theme.h"
 #include "core/DeviceFactory.h"
 #include "plugins/CameraManager.h"
+#include <algorithm>
 
 // ImGui includes
 #include "imgui.h"

@@ -21,9 +21,19 @@ option(ENABLE_LOGGING "Enable logging" ON)
 
 # 优化选项
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_compile_options(-O3 -DNDEBUG)
+    if(MSVC)
+        add_compile_options(/O2 /DNDEBUG)
+    else()
+        add_compile_options(-O3 -DNDEBUG)
+    endif()
 else()
-    add_compile_options(-g -O0)
+    if(MSVC)
+        add_compile_options(/Od /Zi)
+        # 设置MSVC编码为UTF-8
+        add_compile_options(/utf-8)
+    else()
+        add_compile_options(-g -O0)
+    endif()
 endif()
 
 # 包含目录
