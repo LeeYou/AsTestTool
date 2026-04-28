@@ -4,6 +4,18 @@
 #include "core/DeviceManager.h"
 #include "imgui.h"
 
+namespace {
+constexpr float kPanelButtonWidth = 100.0f;
+constexpr float kPanelButtonHeight = 30.0f;
+
+void ContinueOnSameLineIfFits(float nextItemWidth) {
+    const ImGuiStyle& style = ImGui::GetStyle();
+    if (ImGui::GetContentRegionAvail().x >= nextItemWidth + style.ItemSpacing.x) {
+        ImGui::SameLine();
+    }
+}
+}
+
 namespace AsTestTool {
 
 SignaturePanel::SignaturePanel() {
@@ -50,16 +62,32 @@ void SignaturePanel::RenderDeviceStatus() {
 void SignaturePanel::RenderSignature() {
     ImGui::Text("手写轨迹:");
     ImGui::Separator();
+    bool hasValidSignature = m_hasSignature && m_currentSignature.HasData();
+    ImVec4 captureStatusColor = hasValidSignature ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    ImGui::Text("捕获状态:");
+    ImGui::SameLine();
+    ImGui::TextColored(captureStatusColor, "%s", hasValidSignature ? "已捕获" : "未捕获");
     
     // 手写区域
-    ImVec2 signatureSize = ImVec2(400, 200);
+    ImVec2 availableSize = ImGui::GetContentRegionAvail();
+    ImVec2 signatureSize = ImVec2(std::max(320.0f, availableSize.x), 200.0f);
     ImGui::BeginChild("Signature", signatureSize, true, ImGuiWindowFlags_NoScrollbar);
     
-    if (m_hasSignature && m_currentSignature.HasData()) {
+    if (hasValidSignature) {
         ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "=== 手写数据已捕获 ===");
-        ImGui::Text("轨迹点数: %zu", m_currentSignature.GetPointCount());
-        ImGui::Text("屏幕尺寸: %dx%d", m_currentSignature.width, m_currentSignature.height);
-        ImGui::Text("设备信息: %s", m_currentSignature.deviceInfo.c_str());
+        bool useDenseLayout = ImGui::GetContentRegionAvail().x >= 420.0f;
+        if (useDenseLayout) {
+            ImGui::Columns(2, "SignatureInfoColumns", false);
+            ImGui::Text("轨迹点数: %zu", m_currentSignature.GetPointCount());
+            ImGui::NextColumn();
+            ImGui::Text("屏幕尺寸: %dx%d", m_currentSignature.width, m_currentSignature.height);
+            ImGui::Columns(1);
+            ImGui::Text("设备信息: %s", m_currentSignature.deviceInfo.c_str());
+        } else {
+            ImGui::Text("轨迹点数: %zu", m_currentSignature.GetPointCount());
+            ImGui::Text("屏幕尺寸: %dx%d", m_currentSignature.width, m_currentSignature.height);
+            ImGui::Text("设备信息: %s", m_currentSignature.deviceInfo.c_str());
+        }
         
         // 显示轨迹预览（简化版本）
         ImGui::Separator();
@@ -102,30 +130,31 @@ void SignaturePanel::RenderSignature() {
 }
 
 void SignaturePanel::RenderControls() {
+    ImGui::Text("主要操作:");
     // 设备连接控制
     if (IsDeviceConnected()) {
-        if (ImGui::Button("断开设备", ImVec2(100, 30))) {
+        if (ImGui::Button("断开设备", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
             DisconnectDevice();
         }
         
-        ImGui::SameLine();
+        ContinueOnSameLineIfFits(kPanelButtonWidth);
         if (m_signaturePad && m_signaturePad->IsCapturing()) {
-            if (ImGui::Button("停止捕获", ImVec2(100, 30))) {
+            if (ImGui::Button("停止捕获", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
                 StopCapture();
             }
         } else {
-            if (ImGui::Button("开始捕获", ImVec2(100, 30))) {
+            if (ImGui::Button("开始捕获", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
                 StartCapture();
             }
         }
         
-        ImGui::SameLine();
-        if (ImGui::Button("清除轨迹", ImVec2(100, 30))) {
+        ContinueOnSameLineIfFits(kPanelButtonWidth);
+        if (ImGui::Button("清除轨迹", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
             ClearSignature();
         }
         
-        ImGui::SameLine();
-        if (ImGui::Button("获取数据", ImVec2(100, 30))) {
+        ContinueOnSameLineIfFits(kPanelButtonWidth);
+        if (ImGui::Button("获取数据", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
             if (m_signaturePad) {
                 SignatureData data;
                 if (m_signaturePad->GetSignatureData(data)) {
@@ -138,30 +167,31 @@ void SignaturePanel::RenderControls() {
             }
         }
     } else {
-        if (ImGui::Button("连接设备", ImVec2(100, 30))) {
+        if (ImGui::Button("连接设备", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
             ConnectDevice();
         }
         
-        ImGui::SameLine();
+        ContinueOnSameLineIfFits(kPanelButtonWidth);
         ImGui::BeginDisabled();
-        ImGui::Button("开始捕获", ImVec2(100, 30));
+        ImGui::Button("开始捕获", ImVec2(kPanelButtonWidth, kPanelButtonHeight));
         ImGui::EndDisabled();
         
-        ImGui::SameLine();
+        ContinueOnSameLineIfFits(kPanelButtonWidth);
         ImGui::BeginDisabled();
-        ImGui::Button("清除轨迹", ImVec2(100, 30));
+        ImGui::Button("清除轨迹", ImVec2(kPanelButtonWidth, kPanelButtonHeight));
         ImGui::EndDisabled();
         
-        ImGui::SameLine();
+        ContinueOnSameLineIfFits(kPanelButtonWidth);
         ImGui::BeginDisabled();
-        ImGui::Button("获取数据", ImVec2(100, 30));
+        ImGui::Button("获取数据", ImVec2(kPanelButtonWidth, kPanelButtonHeight));
         ImGui::EndDisabled();
     }
     
     ImGui::Separator();
+    ImGui::Text("显示控制:");
     
     // 全屏模式控制
-    if (ImGui::Button("全屏模式", ImVec2(100, 30))) {
+    if (ImGui::Button("全屏模式", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
         if (m_signaturePad) {
             m_fullscreen = !m_fullscreen;
             m_signaturePad->SetFullscreen(m_fullscreen);
@@ -169,13 +199,13 @@ void SignaturePanel::RenderControls() {
         }
     }
     
-    ImGui::SameLine();
-    if (ImGui::Button("库设置", ImVec2(100, 30))) {
+    ImGui::Separator();
+    ImGui::Text("库管理:");
+    if (ImGui::Button("库设置", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
         m_showLibrarySettings = !m_showLibrarySettings;
     }
-    
-    ImGui::SameLine();
-    if (ImGui::Button("重新加载库", ImVec2(100, 30))) {
+    ContinueOnSameLineIfFits(kPanelButtonWidth);
+    if (ImGui::Button("重新加载库", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
         LoadSignatureLibrary();
     }
     

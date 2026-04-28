@@ -5,6 +5,18 @@
 #include "imgui.h"
 #include <cstring>
 
+namespace {
+constexpr float kPanelButtonWidth = 100.0f;
+constexpr float kPanelButtonHeight = 30.0f;
+
+void ContinueOnSameLineIfFits(float nextItemWidth) {
+    const ImGuiStyle& style = ImGui::GetStyle();
+    if (ImGui::GetContentRegionAvail().x >= nextItemWidth + style.ItemSpacing.x) {
+        ImGui::SameLine();
+    }
+}
+}
+
 namespace AsTestTool {
 
 IDCardPanel::IDCardPanel() {
@@ -48,23 +60,42 @@ void IDCardPanel::RenderDeviceStatus() {
 void IDCardPanel::RenderCardInfo() {
     ImGui::Text("身份证信息:");
     ImGui::Separator();
-    
-    // 添加调试信息
-    ImGui::Text("调试: m_hasCardInfo=%s, IsValid=%s", 
-                m_hasCardInfo ? "true" : "false",
-                m_currentCardInfo.IsValid() ? "true" : "false");
-    
-    if (m_hasCardInfo && m_currentCardInfo.IsValid()) {
+    bool hasValidCardInfo = m_hasCardInfo && m_currentCardInfo.IsValid();
+    ImVec4 infoStatusColor = hasValidCardInfo ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    ImGui::Text("读取状态:");
+    ImGui::SameLine();
+    ImGui::TextColored(infoStatusColor, "%s", hasValidCardInfo ? "已读取" : "未读取");
+     
+    if (hasValidCardInfo) {
         ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "=== 身份证信息已读取 ===");
-        ImGui::Text("姓名: %s", m_currentCardInfo.name.c_str());
-        ImGui::Text("性别: %s", m_currentCardInfo.gender.c_str());
-        ImGui::Text("民族: %s", m_currentCardInfo.nation.c_str());
-        ImGui::Text("出生日期: %s", m_currentCardInfo.birthDate.c_str());
-        ImGui::Text("住址: %s", m_currentCardInfo.address.c_str());
-        ImGui::Text("身份证号: %s", m_currentCardInfo.idNumber.c_str());
-        ImGui::Text("签发机关: %s", m_currentCardInfo.issuingAuthority.c_str());
-        ImGui::Text("有效期限: %s", m_currentCardInfo.validPeriod.c_str());
-        
+        bool useDenseLayout = ImGui::GetContentRegionAvail().x >= 420.0f;
+        if (useDenseLayout) {
+            ImGui::Columns(2, "IDCardInfoColumns", false);
+            ImGui::Text("姓名: %s", m_currentCardInfo.name.c_str());
+            ImGui::NextColumn();
+            ImGui::Text("性别: %s", m_currentCardInfo.gender.c_str());
+            ImGui::NextColumn();
+            ImGui::Text("民族: %s", m_currentCardInfo.nation.c_str());
+            ImGui::NextColumn();
+            ImGui::Text("出生日期: %s", m_currentCardInfo.birthDate.c_str());
+            ImGui::NextColumn();
+            ImGui::Text("身份证号: %s", m_currentCardInfo.idNumber.c_str());
+            ImGui::NextColumn();
+            ImGui::Text("有效期限: %s", m_currentCardInfo.validPeriod.c_str());
+            ImGui::Columns(1);
+            ImGui::Text("签发机关: %s", m_currentCardInfo.issuingAuthority.c_str());
+            ImGui::Text("住址: %s", m_currentCardInfo.address.c_str());
+        } else {
+            ImGui::Text("姓名: %s", m_currentCardInfo.name.c_str());
+            ImGui::Text("性别: %s", m_currentCardInfo.gender.c_str());
+            ImGui::Text("民族: %s", m_currentCardInfo.nation.c_str());
+            ImGui::Text("出生日期: %s", m_currentCardInfo.birthDate.c_str());
+            ImGui::Text("住址: %s", m_currentCardInfo.address.c_str());
+            ImGui::Text("身份证号: %s", m_currentCardInfo.idNumber.c_str());
+            ImGui::Text("签发机关: %s", m_currentCardInfo.issuingAuthority.c_str());
+            ImGui::Text("有效期限: %s", m_currentCardInfo.validPeriod.c_str());
+        }
+         
         ImGui::Separator();
         if (!m_currentCardInfo.photo.empty()) {
             ImGui::Text("照片: 已获取 (BASE64编码)");
@@ -74,78 +105,99 @@ void IDCardPanel::RenderCardInfo() {
         }
     } else {
         ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "=== 身份证信息未读取 ===");
-        ImGui::Text("姓名: 未读取");
-        ImGui::Text("性别: 未读取");
-        ImGui::Text("民族: 未读取");
-        ImGui::Text("出生日期: 未读取");
-        ImGui::Text("住址: 未读取");
-        ImGui::Text("身份证号: 未读取");
-        ImGui::Text("签发机关: 未读取");
-        ImGui::Text("有效期限: 未读取");
-        
+        bool useDenseLayout = ImGui::GetContentRegionAvail().x >= 420.0f;
+        if (useDenseLayout) {
+            ImGui::Columns(2, "IDCardInfoColumnsEmpty", false);
+            ImGui::Text("姓名: 未读取");
+            ImGui::NextColumn();
+            ImGui::Text("性别: 未读取");
+            ImGui::NextColumn();
+            ImGui::Text("民族: 未读取");
+            ImGui::NextColumn();
+            ImGui::Text("出生日期: 未读取");
+            ImGui::NextColumn();
+            ImGui::Text("身份证号: 未读取");
+            ImGui::NextColumn();
+            ImGui::Text("有效期限: 未读取");
+            ImGui::Columns(1);
+            ImGui::Text("签发机关: 未读取");
+            ImGui::Text("住址: 未读取");
+        } else {
+            ImGui::Text("姓名: 未读取");
+            ImGui::Text("性别: 未读取");
+            ImGui::Text("民族: 未读取");
+            ImGui::Text("出生日期: 未读取");
+            ImGui::Text("住址: 未读取");
+            ImGui::Text("身份证号: 未读取");
+            ImGui::Text("签发机关: 未读取");
+            ImGui::Text("有效期限: 未读取");
+        }
+         
         ImGui::Separator();
         ImGui::Text("照片: 无");
     }
 }
 
 void IDCardPanel::RenderControls() {
+    ImGui::Text("主要操作:");
     // 设备连接控制
     if (IsDeviceConnected()) {
-        if (ImGui::Button("断开设备", ImVec2(100, 30))) {
+        if (ImGui::Button("断开设备", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
             DisconnectDevice();
         }
     } else {
-        if (ImGui::Button("连接设备", ImVec2(100, 30))) {
+        if (ImGui::Button("连接设备", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
             ConnectDevice();
         }
     }
-    
-    ImGui::SameLine();
-    
+     
+    ContinueOnSameLineIfFits(kPanelButtonWidth);
+     
     // 读取身份证控制
     bool canRead = IsDeviceConnected() && m_idCardReader && m_idCardReader->HasCard();
     if (!canRead) {
         ImGui::BeginDisabled();
     }
-    
-    if (ImGui::Button("读取身份证", ImVec2(100, 30))) {
+     
+    if (ImGui::Button("读取身份证", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
         ReadCard();
     }
-    
+     
     if (!canRead) {
         ImGui::EndDisabled();
     }
-    
-    ImGui::SameLine();
-    
+     
+    ContinueOnSameLineIfFits(kPanelButtonWidth);
+     
     // 弹出卡片控制
     bool canEject = IsDeviceConnected();
     if (!canEject) {
         ImGui::BeginDisabled();
     }
-    
-    if (ImGui::Button("弹出卡片", ImVec2(100, 30))) {
+     
+    if (ImGui::Button("弹出卡片", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
         EjectCard();
     }
-    
+     
     if (!canEject) {
         ImGui::EndDisabled();
     }
     
     ImGui::Separator();
-    
+    ImGui::Text("库管理:");
+     
     // 库设置按钮
-    if (ImGui::Button("库设置", ImVec2(100, 30))) {
+    if (ImGui::Button("库设置", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
         m_showLibrarySettings = !m_showLibrarySettings;
     }
-    
-    ImGui::SameLine();
-    
+     
+    ContinueOnSameLineIfFits(kPanelButtonWidth);
+     
     // 重新加载库按钮
-    if (ImGui::Button("重新加载库", ImVec2(100, 30))) {
+    if (ImGui::Button("重新加载库", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
         LoadIDCardLibrary();
     }
-    
+     
     ImGui::Separator();
 }
 
