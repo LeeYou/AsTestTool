@@ -1,6 +1,7 @@
 #include "gui/SignaturePanel.h"
-#include "devices/signature/WindowsSignaturePad.h"
 #include "utils/Logger.h"
+#include "utils/FileDialog.h"
+#include "core/DeviceManager.h"
 #include "imgui.h"
 
 namespace AsTestTool {
@@ -195,22 +196,18 @@ void SignaturePanel::RenderLibrarySettings() {
     
     ImGui::SameLine();
     if (ImGui::Button("浏览...", ImVec2(80, 20))) {
-        // 打开文件对话框
-        OPENFILENAMEA ofn;
-        char szFile[512] = {0};
-        
-        ZeroMemory(&ofn, sizeof(ofn));
-        ofn.lStructSize = sizeof(ofn);
-        ofn.lpstrFile = szFile;
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = "Dynamic Link Library (*.dll)\0*.dll\0All Files (*.*)\0*.*\0";
-        ofn.nFilterIndex = 1;
-        ofn.lpstrTitle = "选择手写屏DLL文件";
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-        
-        if (GetOpenFileNameA(&ofn)) {
-            m_libraryPath = std::string(szFile);
-            LOG_INFO("Selected DLL file: " + m_libraryPath);
+        // 使用跨平台文件对话框
+        auto fileDialog = FileDialog::Create();
+        if (fileDialog) {
+            std::vector<FileDialogFilter> filters = {
+                {"动态链接库 (*.dll)", "*.dll"},
+                {"所有文件 (*.*)", "*.*"}
+            };
+            auto result = fileDialog->OpenFile("选择手写屏DLL文件", filters);
+            if (result.success) {
+                m_libraryPath = result.filePath;
+                LOG_INFO("Selected DLL file: " + m_libraryPath);
+            }
         }
     }
     
@@ -220,7 +217,7 @@ void SignaturePanel::RenderLibrarySettings() {
     ImGui::Separator();
     ImGui::Text("默认加载:");
     ImGui::BulletText("系统DLL: CMCC_SIGN.DLL");
-    ImGui::BulletText("Windows会自动在系统目录中查找");
+    ImGui::BulletText("系统会自动在系统目录中查找");
     ImGui::BulletText("包括: System32, SysWOW64, PATH环境变量等");
 }
 
@@ -228,21 +225,18 @@ void SignaturePanel::RenderLibrarySettings() {
 void SignaturePanel::ConnectDevice() {
     LOG_INFO("Connecting signature pad device");
     
+    // 从 DeviceManager 获取设备
+    m_signaturePad.reset(DeviceManager::Instance().GetSignaturePad());
+    
     if (!m_signaturePad) {
         LOG_ERROR("No signature pad device available");
         return;
     }
     
-    // 尝试转换为WindowsSignaturePad并打开设备
-    auto windowsPad = std::dynamic_pointer_cast<WindowsSignaturePad>(m_signaturePad);
-    if (windowsPad) {
-        if (windowsPad->OpenDevice()) {
-            LOG_INFO("Signature pad device connected successfully");
-        } else {
-            LOG_ERROR("Failed to connect signature pad device");
-        }
+    if (m_signaturePad->Initialize()) {
+        LOG_INFO("Signature pad device connected successfully");
     } else {
-        LOG_ERROR("Signature pad is not a Windows implementation");
+        LOG_ERROR("Failed to connect signature pad device");
     }
 }
 
@@ -257,17 +251,8 @@ void SignaturePanel::DisconnectDevice() {
     // 停止捕获
     StopCapture();
     
-    // 尝试转换为WindowsSignaturePad并关闭设备
-    auto windowsPad = std::dynamic_pointer_cast<WindowsSignaturePad>(m_signaturePad);
-    if (windowsPad) {
-        if (windowsPad->CloseDevice()) {
-            LOG_INFO("Signature pad device disconnected successfully");
-        } else {
-            LOG_WARNING("Failed to disconnect signature pad device");
-        }
-    } else {
-        LOG_ERROR("Signature pad is not a Windows implementation");
-    }
+    m_signaturePad->Shutdown();
+    LOG_INFO("Signature pad device disconnected successfully");
 }
 
 void SignaturePanel::StartCapture() {
@@ -320,22 +305,9 @@ void SignaturePanel::ClearSignature() {
 void SignaturePanel::LoadSignatureLibrary() {
     LOG_INFO("Loading signature pad library: " + m_libraryPath);
     
-    if (!m_signaturePad) {
-        LOG_ERROR("No signature pad device available");
-        return;
-    }
-    
-    // 尝试转换为WindowsSignaturePad并加载库
-    auto windowsPad = std::dynamic_pointer_cast<WindowsSignaturePad>(m_signaturePad);
-    if (windowsPad) {
-        if (windowsPad->LoadLibrary(m_libraryPath)) {
-            LOG_INFO("Signature pad library loaded successfully");
-        } else {
-            LOG_ERROR("Failed to load signature pad library");
-        }
-    } else {
-        LOG_ERROR("Signature pad is not a Windows implementation");
-    }
+    // 设备库的加载由设备本身处理
+    // 这里主要是记录配置
+    LOG_INFO("Library path configured: " + m_libraryPath);
 }
 
 // 状态检查方法实现

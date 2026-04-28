@@ -1,9 +1,7 @@
 #pragma once
 
-#include "devices/interfaces/IIDCardReader.h"
-#include "devices/interfaces/ICamera.h"
-#include "devices/interfaces/ISignaturePad.h"
 #include "gui/MainWindow.h"
+#include "core/DeviceManager.h"
 #include <memory>
 #include <string>
 
@@ -160,13 +158,13 @@ private:
     int m_windowWidth = 1200;
     int m_windowHeight = 800;
     
-    // Devices
-    std::unique_ptr<IIDCardReader> m_idCardReader;
-    std::unique_ptr<ICamera> m_camera;
-    std::unique_ptr<ISignaturePad> m_signaturePad;
-    
     // GUI
     std::unique_ptr<MainWindow> m_mainWindow;
+    
+    // Devices
+    std::shared_ptr<IIDCardReader> m_idCardReader;
+    std::shared_ptr<ICamera> m_camera;
+    std::shared_ptr<ISignaturePad> m_signaturePad;
 };
 
 } // namespace AsTestTool

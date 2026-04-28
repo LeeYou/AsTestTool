@@ -4,9 +4,21 @@
 #include <string>
 #include <memory>
 #include "plugins/CameraManager.h"
+#include "gui/TextureRenderer.h"
+#include "gui/LayoutManager.h"
 
-// ImGui forward declarations
-struct ImVec2;
+// ImGui 头文件
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
+#include <imgui.h>
 
 namespace AsTestTool {
 
@@ -102,8 +114,8 @@ private:
     std::vector<Plugins::CameraInfo> m_availableCameras;
     int m_selectedDevice = 0;
     
-    // 预览纹理
-    void* m_previewTexture = nullptr;
+    // 纹理渲染器（优化预览性能）
+    std::unique_ptr<TextureRenderer> m_textureRenderer;
     
     // 图像数据
     std::vector<uint8_t> m_imageData;

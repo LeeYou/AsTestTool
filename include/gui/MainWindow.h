@@ -1,10 +1,11 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include "gui/IDCardPanel.h"
 #include "gui/CameraPanel.h"
 #include "gui/SignaturePanel.h"
-#include "core/DeviceFactory.h"
+#include "gui/LayoutManager.h"
 #include "plugins/CameraManager.h"
 
 namespace AsTestTool {
@@ -54,25 +55,18 @@ private:
     void RenderMainContent();
     void RenderStatusBar();
     void RenderDebugInfo();
-    void InitializeDevices();
+    void InitializePanels();
     
-    // 设备状态管理
-    struct DeviceStatus {
-        bool idCardConnected = false;
-        bool cameraConnected = false;
-        bool signatureConnected = false;
-    };
-    DeviceStatus GetDeviceStatus() const;
-
+    // 布局管理器
+    LayoutManager m_layoutManager;
+    
     bool m_initialized = false;
     std::unique_ptr<IDCardPanel> m_idCardPanel;
     std::unique_ptr<CameraPanel> m_cameraPanel;
     std::unique_ptr<SignaturePanel> m_signaturePanel;
     
-    // 设备管理
+    // 摄像头管理器（由 CameraPanel 使用）
     std::shared_ptr<Plugins::CameraManager> m_cameraManager;
-    std::shared_ptr<IIDCardReader> m_idCardReader;
-    std::shared_ptr<ISignaturePad> m_signaturePad;
 };
 
 } // namespace AsTestTool

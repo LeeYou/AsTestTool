@@ -78,11 +78,11 @@ set(SOURCES
     src/main.cpp
     src/core/Application.cpp
     src/core/DeviceFactory.cpp
+    src/core/DeviceManager.cpp
     src/core/Config.cpp
     src/core/ErrorCode.cpp
     src/devices/idcard/IDCardReaderAdapter.cpp
     src/devices/idcard/LibraryLoader.cpp
-    src/devices/camera/CameraManager.cpp
     src/devices/signature/SignaturePadAdapter.cpp
     src/devices/signature/FullscreenWindow.cpp
     src/plugins/PluginLoader.cpp
@@ -92,9 +92,13 @@ set(SOURCES
     src/gui/CameraPanel.cpp
     src/gui/SignaturePanel.cpp
     src/gui/Theme.cpp
+    src/gui/LayoutManager.cpp
+    src/gui/TextureRenderer.cpp
+    src/gui/BasePanel.cpp
     src/utils/LogDisplay.cpp
     src/utils/FileUtils.cpp
     src/utils/StringUtils.cpp
+    src/utils/FileDialog.cpp
 )
 
 # 平台特定源文件
@@ -116,14 +120,18 @@ endif()
 set(HEADERS
     include/core/Application.h
     include/core/DeviceFactory.h
+    include/core/DeviceManager.h
     include/core/Config.h
     include/devices/interfaces/IDevice.h
     include/devices/interfaces/IIDCardReader.h
     include/devices/interfaces/ICamera.h
     include/devices/interfaces/ISignaturePad.h
+    include/devices/interfaces/ImageData.h
+    include/devices/interfaces/IPreviewController.h
+    include/devices/interfaces/IImageCapture.h
+    include/devices/interfaces/IImageSettings.h
     include/devices/idcard/IDCardReaderAdapter.h
     include/devices/idcard/LibraryLoader.h
-    include/devices/camera/CameraManager.h
     include/devices/signature/SignaturePadAdapter.h
     include/devices/signature/FullscreenWindow.h
     include/plugins/ICameraPlugin.h
@@ -134,10 +142,15 @@ set(HEADERS
     include/gui/CameraPanel.h
     include/gui/SignaturePanel.h
     include/gui/Theme.h
+    include/gui/LayoutManager.h
+    include/gui/TextureRenderer.h
+    include/gui/BasePanel.h
     include/utils/Logger.h
     include/utils/LogDisplay.h
     include/utils/FileUtils.h
     include/utils/StringUtils.h
+    include/utils/Singleton.h
+    include/utils/FileDialog.h
 )
 
 # 创建Logger库
@@ -289,7 +302,7 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CM
 if(WIN32)
     # 使用 NSIS 生成器
     set(CPACK_GENERATOR "NSIS")
-    
+
     # NSIS 特定设置
     set(CPACK_NSIS_DISPLAY_NAME "AsTestTool")
     set(CPACK_NSIS_PACKAGE_NAME "AsTestTool")
@@ -298,20 +311,20 @@ if(WIN32)
     set(CPACK_NSIS_HELP_LINK "https://github.com/astesttool/astesttool/wiki")
     set(CPACK_NSIS_URL_INFO_ABOUT "https://github.com/astesttool/astesttool")
     set(CPACK_NSIS_MODIFY_PATH ON)
-    
+
     # 设置安装组件
     set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "AsTestTool Application")
     set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION "AsTestTool 主程序")
     set(CPACK_COMPONENT_APPLICATIONS_REQUIRED ON)
-    
+
     # 设置安装目录
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "AsTestTool")
-    
+
     # 包含运行时库
     set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
     set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/resources/icons/app.ico")
     set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/resources/icons/app.ico")
-    
+
     # 创建桌面快捷方式
     set(CPACK_NSIS_CREATE_ICONS_EXTRA
         "CreateShortCut '$DESKTOP\\\\AsTestTool.lnk' '$INSTDIR\\\\bin\\\\AsTestTool.exe'"
@@ -319,27 +332,27 @@ if(WIN32)
     set(CPACK_NSIS_DELETE_ICONS_EXTRA
         "Delete '$DESKTOP\\\\AsTestTool.lnk'"
     )
-    
+
     # 创建开始菜单快捷方式
     set(CPACK_NSIS_MENU_LINKS
         "bin/AsTestTool.exe" "AsTestTool"
     )
-    
+
 elseif(UNIX AND NOT APPLE)
     # Linux 特定配置
     set(CPACK_GENERATOR "TGZ;DEB;RPM")
-    
+
     # DEB 包配置
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "AsTestTool Team <support@astesttool.com>")
     set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libstdc++6, libgl1-mesa-glx")
-    
+
     # RPM 包配置
     set(CPACK_RPM_PACKAGE_LICENSE "MIT")
     set(CPACK_RPM_PACKAGE_GROUP "Applications/System")
     set(CPACK_RPM_PACKAGE_REQUIRES "glibc, libstdc++, mesa-libGL")
-    
+
 elseif(APPLE)
     # macOS 特定配置
     set(CPACK_GENERATOR "DragNDrop")

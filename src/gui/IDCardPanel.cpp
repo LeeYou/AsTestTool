@@ -1,6 +1,7 @@
 #include "gui/IDCardPanel.h"
 #include "utils/Logger.h"
-#include "devices/idcard/WindowsIDCardReader.h"
+#include "utils/FileDialog.h"
+#include "core/DeviceManager.h"
 #include "imgui.h"
 #include <cstring>
 
@@ -163,22 +164,18 @@ void IDCardPanel::RenderLibrarySettings() {
         
         ImGui::SameLine();
         if (ImGui::Button("浏览...", ImVec2(80, 20))) {
-            // 打开文件对话框
-            OPENFILENAMEA ofn;
-            char szFile[512] = {0};
-            
-            ZeroMemory(&ofn, sizeof(ofn));
-            ofn.lStructSize = sizeof(ofn);
-            ofn.lpstrFile = szFile;
-            ofn.nMaxFile = sizeof(szFile);
-            ofn.lpstrFilter = "Dynamic Link Library (*.dll)\0*.dll\0All Files (*.*)\0*.*\0";
-            ofn.nFilterIndex = 1;
-            ofn.lpstrTitle = "选择身份证阅读器DLL文件";
-            ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-            
-            if (GetOpenFileNameA(&ofn)) {
-                m_libraryPath = std::string(szFile);
-                LOG_INFO("Selected DLL file: " + m_libraryPath);
+            // 使用跨平台文件对话框
+            auto fileDialog = FileDialog::Create();
+            if (fileDialog) {
+                std::vector<FileDialogFilter> filters = {
+                    {"动态链接库 (*.dll)", "*.dll"},
+                    {"所有文件 (*.*)", "*.*"}
+                };
+                auto result = fileDialog->OpenFile("选择身份证阅读器DLL文件", filters);
+                if (result.success) {
+                    m_libraryPath = result.filePath;
+                    LOG_INFO("Selected DLL file: " + m_libraryPath);
+                }
             }
         }
         
@@ -191,7 +188,7 @@ void IDCardPanel::RenderLibrarySettings() {
         // 显示默认路径信息
         ImGui::Text("默认加载:");
         ImGui::BulletText("系统DLL: CMCC_IDCARD.DLL");
-        ImGui::BulletText("Windows会自动在系统目录中查找");
+        ImGui::BulletText("系统会自动在系统目录中查找");
         ImGui::BulletText("包括: System32, SysWOW64, PATH环境变量等");
         
         ImGui::Separator();
@@ -218,21 +215,18 @@ void IDCardPanel::RenderLibrarySettings() {
 void IDCardPanel::ConnectDevice() {
     LOG_INFO("Connecting ID card device");
     
+    // 从 DeviceManager 获取设备
+    m_idCardReader.reset(DeviceManager::Instance().GetIDCardReader());
+    
     if (!m_idCardReader) {
         LOG_ERROR("No ID card reader device available");
         return;
     }
     
-    // 尝试转换为WindowsIDCardReader以访问OpenDevice方法
-    auto windowsReader = std::dynamic_pointer_cast<WindowsIDCardReader>(m_idCardReader);
-    if (windowsReader) {
-        if (windowsReader->OpenDevice(m_devicePort)) {
-            LOG_INFO("ID card device connected successfully");
-        } else {
-            LOG_ERROR("Failed to connect ID card device");
-        }
+    if (m_idCardReader->Initialize()) {
+        LOG_INFO("ID card device connected successfully");
     } else {
-        LOG_ERROR("ID card reader is not a Windows implementation");
+        LOG_ERROR("Failed to connect ID card device");
     }
 }
 
@@ -244,20 +238,11 @@ void IDCardPanel::DisconnectDevice() {
         return;
     }
     
-    // 尝试转换为WindowsIDCardReader以访问CloseDevice方法
-    auto windowsReader = std::dynamic_pointer_cast<WindowsIDCardReader>(m_idCardReader);
-    if (windowsReader) {
-        if (windowsReader->CloseDevice()) {
-            LOG_INFO("ID card device disconnected successfully");
-            // 清空当前卡片信息
-            m_hasCardInfo = false;
-            m_currentCardInfo.Clear();
-        } else {
-            LOG_ERROR("Failed to disconnect ID card device");
-        }
-    } else {
-        LOG_ERROR("ID card reader is not a Windows implementation");
-    }
+    m_idCardReader->Shutdown();
+    LOG_INFO("ID card device disconnected successfully");
+    // 清空当前卡片信息
+    m_hasCardInfo = false;
+    m_currentCardInfo.Clear();
 }
 
 void IDCardPanel::ReadCard() {
@@ -314,22 +299,9 @@ void IDCardPanel::EjectCard() {
 void IDCardPanel::LoadIDCardLibrary() {
     LOG_INFO("Loading ID card reader library: " + m_libraryPath);
     
-    if (!m_idCardReader) {
-        LOG_ERROR("No ID card reader device available");
-        return;
-    }
-    
-    // 尝试转换为WindowsIDCardReader以访问LoadLibrary方法
-    auto windowsReader = std::dynamic_pointer_cast<WindowsIDCardReader>(m_idCardReader);
-    if (windowsReader) {
-        if (windowsReader->LoadLibrary(m_libraryPath)) {
-            LOG_INFO("Library loaded successfully");
-        } else {
-            LOG_ERROR("Failed to load library: " + m_libraryPath);
-        }
-    } else {
-        LOG_ERROR("ID card reader is not a Windows implementation");
-    }
+    // 设备库的加载由设备本身处理
+    // 这里主要是记录配置
+    LOG_INFO("Library path configured: " + m_libraryPath);
 }
 
 bool IDCardPanel::IsDeviceConnected() const {

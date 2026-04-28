@@ -1,6 +1,6 @@
 #include "core/Application.h"
-#include "core/DeviceFactory.h"
 #include "core/Config.h"
+#include "core/DeviceManager.h"
 #include "utils/Logger.h"
 #include "utils/LogDisplay.h"
 #include "core/ErrorCode.h"
@@ -108,53 +108,23 @@ void Application::Shutdown() {
 }
 
 bool Application::InitializeDevices() {
-    LOG_INFO("Initializing devices");
+    LOG_INFO("Initializing devices via DeviceManager");
     
-    try {
-        // 创建身份证阅读器
-        m_idCardReader = DeviceFactory::CreateIDCardReader();
-        if (!m_idCardReader) {
-            LOG_WARNING("Failed to create ID card reader");
-        }
-        
-        // 创建摄像头
-        m_camera = DeviceFactory::CreateCamera();
-        if (!m_camera) {
-            LOG_WARNING("Failed to create camera");
-        }
-        
-        // 创建手写屏
-        m_signaturePad = DeviceFactory::CreateSignaturePad();
-        if (!m_signaturePad) {
-            LOG_WARNING("Failed to create signature pad");
-        }
-        
-        LOG_INFO("Devices initialized successfully");
-        return true;
-        
-    } catch (const std::exception& e) {
-        LOG_ERROR("Exception during device initialization: " + std::string(e.what()));
+    // 使用 DeviceManager 统一初始化所有设备
+    if (!DeviceManager::Instance().InitializeAll()) {
+        LOG_ERROR("Failed to initialize devices");
         return false;
     }
+    
+    LOG_INFO("Devices initialized successfully");
+    return true;
 }
 
 void Application::ShutdownDevices() {
-    LOG_INFO("Shutting down devices");
+    LOG_INFO("Shutting down devices via DeviceManager");
     
-    if (m_idCardReader) {
-        m_idCardReader->Shutdown();
-        m_idCardReader.reset();
-    }
-    
-    if (m_camera) {
-        m_camera->Shutdown();
-        m_camera.reset();
-    }
-    
-    if (m_signaturePad) {
-        m_signaturePad->Shutdown();
-        m_signaturePad.reset();
-    }
+    // 使用 DeviceManager 统一关闭所有设备
+    DeviceManager::Instance().ShutdownAll();
     
     LOG_INFO("Devices shutdown complete");
 }

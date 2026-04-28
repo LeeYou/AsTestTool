@@ -9,8 +9,11 @@
 
 namespace AsTestTool {
 
-CameraPanel::CameraPanel() {
+CameraPanel::CameraPanel() 
+    : m_textureRenderer(std::make_unique<TextureRenderer>()) {
     LOG_INFO("CameraPanel created");
+    // 初始化纹理渲染器
+    m_textureRenderer->Initialize();
     // 初始化默认分辨率 - 使用更通用的分辨率
     m_currentResolution = Plugins::Resolution(640, 480);
 }
@@ -20,6 +23,7 @@ CameraPanel::~CameraPanel() {
     if (m_cameraManager) {
         StopPreview();
     }
+    m_textureRenderer->Shutdown();
 }
 
 void CameraPanel::Render() {
@@ -334,6 +338,38 @@ void CameraPanel::RenderDeviceControls() {
     }
 }
 
+// 辅助函数：渲染预览占位符
+static void RenderPreviewPlaceholder(const ImVec2& startPos, const ImVec2& size, 
+                                   const char* mainText, const char* hintText, bool isError = false) {
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 previewStart = startPos;
+    ImVec2 previewEnd = ImVec2(previewStart.x + size.x, previewStart.y + size.y);
+    
+    // 绘制背景
+    ImU32 bgColor = isError ? IM_COL32(50, 30, 30, 255) : IM_COL32(40, 40, 40, 255);
+    ImU32 borderColor = IM_COL32(100, 100, 100, 255);
+    drawList->AddRectFilled(previewStart, previewEnd, bgColor);
+    drawList->AddRect(previewStart, previewEnd, borderColor, 0.0f, 0, 2.0f);
+    
+    // 绘制中心内容
+    ImVec2 center = ImVec2((previewStart.x + previewEnd.x) * 0.5f, (previewStart.y + previewEnd.y) * 0.5f);
+    
+    // 摄像头图标
+    ImVec2 iconPos = ImVec2(center.x - 30, center.y - 50);
+    drawList->AddText(iconPos, IM_COL32(80, 80, 80, 255), "📷");
+    
+    // 主文本
+    ImVec2 textPos = ImVec2(center.x - (mainText ? strlen(mainText) * 3.5f : 50), center.y + 5);
+    ImU32 textColor = isError ? IM_COL32(200, 100, 100, 255) : IM_COL32(160, 160, 160, 255);
+    drawList->AddText(textPos, textColor, mainText);
+    
+    // 提示文本
+    if (hintText) {
+        ImVec2 hintPos = ImVec2(center.x - strlen(hintText) * 3.5f, center.y + 25);
+        drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), hintText);
+    }
+}
+
 void CameraPanel::RenderPreviewArea() {
     // 计算预览区域尺寸（保持比例）
     ImVec2 availableSize = ImGui::GetContentRegionAvail();
@@ -344,6 +380,10 @@ void CameraPanel::RenderPreviewArea() {
         (availableSize.x - previewSize.x) * 0.5f,
         (availableSize.y - previewSize.y) * 0.5f
     );
+    ImGui::SetCursorPos(centerPos);
+    
+    // 扩展窗口边界（防止断言错误）
+    ImGui::Dummy(previewSize);
     ImGui::SetCursorPos(centerPos);
     
     // 显示预览图像
@@ -357,145 +397,27 @@ void CameraPanel::RenderPreviewArea() {
                 m_imageHeight = height;
                 m_hasImageData = true;
                 m_currentFormat = GetPixelFormatString(format);
-                // 减少日志输出频率，避免刷屏
-                static int logCounter = 0;
-                if (++logCounter % 30 == 0) { // 每30帧输出一次日志
-                    LOG_INFO("Preview frame: " + std::to_string(width) + "x" + std::to_string(height) + ", data size: " + std::to_string(m_imageData.size()));
-                }
-            } else {
-                // 减少错误日志频率
-                static int errorCounter = 0;
-                if (++errorCounter % 60 == 0) { // 每60帧输出一次错误日志
-                    LOG_ERROR("Failed to capture preview frame");
+                
+                // 使用纹理渲染器上传图像数据（优化性能的关键）
+                if (m_textureRenderer && !m_imageData.empty()) {
+                    m_textureRenderer->UploadBGR(m_imageData.data(), width, height);
                 }
             }
         }
         
-        if (m_hasImageData && !m_imageData.empty()) {
-            // 使用真实的图像数据绘制预览
-            ImDrawList* drawList = ImGui::GetWindowDrawList();
-            ImVec2 windowPos = ImGui::GetWindowPos();
-            ImVec2 previewStart = ImVec2(windowPos.x + centerPos.x, windowPos.y + centerPos.y);
-            ImVec2 previewEnd = ImVec2(previewStart.x + previewSize.x, previewStart.y + previewSize.y);
-            
-            // 绘制图像数据
-            float scaleX = previewSize.x / m_imageWidth;
-            float scaleY = previewSize.y / m_imageHeight;
-            float scale = std::min(scaleX, scaleY);
-            
-            int scaledWidth = (int)(m_imageWidth * scale);
-            int scaledHeight = (int)(m_imageHeight * scale);
-            
-            // 居中绘制
-            ImVec2 imageStart = ImVec2(
-                previewStart.x + (previewSize.x - scaledWidth) * 0.5f,
-                previewStart.y + (previewSize.y - scaledHeight) * 0.5f
-            );
-            ImVec2 imageEnd = ImVec2(imageStart.x + scaledWidth, imageStart.y + scaledHeight);
-            
-            // 绘制图像像素（简化版本，使用更大的像素块以提高性能）
-            int pixelSize = 2; // 每个像素块的大小
-            for (int y = 0; y < scaledHeight; y += pixelSize) {
-                for (int x = 0; x < scaledWidth; x += pixelSize) {
-                    // 计算原始图像坐标
-                    int srcX = (int)(x / scale);
-                    int srcY = (int)(y / scale);
-                    
-                    if (srcX < m_imageWidth && srcY < m_imageHeight) {
-                        int srcIndex = (srcY * m_imageWidth + srcX) * 3;
-                        if (srcIndex + 2 < m_imageData.size()) {
-                            uint8_t r = m_imageData[srcIndex];
-                            uint8_t g = m_imageData[srcIndex + 1];
-                            uint8_t b = m_imageData[srcIndex + 2];
-                            
-                            ImVec2 pixelPos = ImVec2(imageStart.x + x, imageStart.y + y);
-                            ImVec2 pixelEnd = ImVec2(pixelPos.x + pixelSize, pixelPos.y + pixelSize);
-                            drawList->AddRectFilled(pixelPos, pixelEnd, IM_COL32(r, g, b, 255));
-                        }
-                    }
-                }
-            }
-            
-            // 绘制边框
-            drawList->AddRect(imageStart, imageEnd, IM_COL32(255, 255, 255, 255), 0.0f, 0, 2.0f);
-            
-            // 移除信息覆盖层，避免与ImageInfo区域重复显示
+        if (m_hasImageData && m_textureRenderer && m_textureRenderer->HasValidTexture()) {
+            // 使用 ImGui::Image 直接渲染纹理（GPU加速，高效）
+            ImGui::Image(m_textureRenderer->GetImTextureID(), previewSize);
         } else {
-            // 没有图像数据时显示占位符
-            ImDrawList* drawList = ImGui::GetWindowDrawList();
-            ImVec2 windowPos = ImGui::GetWindowPos();
-            ImVec2 previewStart = ImVec2(windowPos.x + centerPos.x, windowPos.y + centerPos.y);
-            ImVec2 previewEnd = ImVec2(previewStart.x + previewSize.x, previewStart.y + previewSize.y);
-            
-            // 绘制渐变背景
-            drawList->AddRectFilled(previewStart, previewEnd, IM_COL32(30, 30, 30, 255));
-            drawList->AddRect(previewStart, previewEnd, IM_COL32(80, 80, 80, 255), 0.0f, 0, 2.0f);
-            
-            // 绘制摄像头图标和状态文本
-            ImVec2 center = ImVec2((previewStart.x + previewEnd.x) * 0.5f, (previewStart.y + previewEnd.y) * 0.5f);
-            
-            // 摄像头图标（更大更清晰）
-            ImVec2 iconPos = ImVec2(center.x - 30, center.y - 50);
-            drawList->AddText(iconPos, IM_COL32(120, 120, 120, 255), "📷");
-            
-            // 状态文本（更清晰的层次）
-            ImVec2 textPos = ImVec2(center.x - 60, center.y + 5);
-            drawList->AddText(textPos, IM_COL32(180, 180, 180, 255), "正在获取图像...");
-            
-            // 提示文本（更友好的提示）
-            ImVec2 hintPos = ImVec2(center.x - 90, center.y + 25);
-            drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "请稍候，正在连接摄像头");
-            
-            // 添加加载指示器
-            ImVec2 loadingPos = ImVec2(center.x - 10, center.y + 45);
-            drawList->AddText(loadingPos, IM_COL32(100, 150, 200, 255), "● 连接中");
+            RenderPreviewPlaceholder(centerPos, previewSize, "正在获取图像...", "请稍候，正在连接摄像头");
         }
-        
-        // 创建一个透明的ImGui区域用于交互
-        ImGui::Dummy(previewSize);
     } else {
         // 非预览状态下的占位符
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
-        ImVec2 windowPos = ImGui::GetWindowPos();
-        ImVec2 previewStart = ImVec2(windowPos.x + centerPos.x, windowPos.y + centerPos.y);
-        ImVec2 previewEnd = ImVec2(previewStart.x + previewSize.x, previewStart.y + previewSize.y);
+        const char* mainText = !m_previewActive ? "摄像头预览" : "设备未连接";
+        const char* hintText = m_connected ? "点击 [开始预览] 按钮开始" : "请先选择并连接摄像头设备";
+        bool isError = !m_connected;
         
-        // 绘制背景
-        drawList->AddRectFilled(previewStart, previewEnd, IM_COL32(40, 40, 40, 255));
-        drawList->AddRect(previewStart, previewEnd, IM_COL32(100, 100, 100, 255), 0.0f, 0, 2.0f);
-        
-        // 绘制中心内容
-        ImVec2 center = ImVec2((previewStart.x + previewEnd.x) * 0.5f, (previewStart.y + previewEnd.y) * 0.5f);
-        
-        // 摄像头图标（更大更清晰）
-        ImVec2 iconPos = ImVec2(center.x - 30, center.y - 50);
-        drawList->AddText(iconPos, IM_COL32(80, 80, 80, 255), "📷");
-        
-        // 状态文本（更清晰的层次）
-        if (!m_previewActive) {
-            ImVec2 textPos = ImVec2(center.x - 50, center.y + 5);
-            drawList->AddText(textPos, IM_COL32(160, 160, 160, 255), "摄像头预览");
-            
-            ImVec2 hintPos = ImVec2(center.x - 80, center.y + 25);
-            drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "点击 [开始预览] 按钮开始");
-            
-            // 添加连接状态指示器
-            ImVec2 statusPos = ImVec2(center.x - 20, center.y + 45);
-            if (m_connected) {
-                drawList->AddText(statusPos, IM_COL32(100, 200, 100, 255), "● 已连接");
-            } else {
-                drawList->AddText(statusPos, IM_COL32(200, 100, 100, 255), "● 未连接");
-            }
-        } else if (!m_connected) {
-            ImVec2 textPos = ImVec2(center.x - 60, center.y + 5);
-            drawList->AddText(textPos, IM_COL32(200, 100, 100, 255), "设备未连接");
-            
-            ImVec2 hintPos = ImVec2(center.x - 100, center.y + 25);
-            drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), "请先选择并连接摄像头设备");
-        }
-        
-        // 创建一个透明的ImGui区域用于交互
-        ImGui::Dummy(previewSize);
+        RenderPreviewPlaceholder(centerPos, previewSize, mainText, hintText, isError);
     }
     
     // 双击全屏
@@ -503,15 +425,10 @@ void CameraPanel::RenderPreviewArea() {
         ToggleFullscreen();
     }
     
-    // 显示实时信息覆盖层
-    RenderPreviewOverlay();
-    
     // 显示网格线
     if (m_showGridLines) {
         RenderGridLines(centerPos, previewSize);
     }
-    
-    // 移除这些控件，它们将被移到ImageInfo区域
 }
 
 void CameraPanel::RenderControlPanel() {

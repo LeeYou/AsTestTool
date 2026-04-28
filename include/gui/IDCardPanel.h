@@ -4,8 +4,18 @@
 #include <memory>
 #include <string>
 
-// Forward declaration for ImGui types
-struct ImVec4;
+// ImGui 头文件
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
+#include <imgui.h>
 
 namespace AsTestTool {
 

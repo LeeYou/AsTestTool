@@ -5,7 +5,8 @@
 #include "gui/CameraPanel.h"
 #include "gui/SignaturePanel.h"
 #include "gui/Theme.h"
-#include "core/DeviceFactory.h"
+#include "gui/LayoutManager.h"
+#include "core/DeviceManager.h"
 #include "plugins/CameraManager.h"
 #include <algorithm>
 
@@ -25,28 +26,8 @@ MainWindow::~MainWindow() {
 bool MainWindow::Initialize() {
     LOG_INFO("Initializing MainWindow");
     
-    // 初始化设备
-    InitializeDevices();
-    
-    // 创建各个面板
-    m_idCardPanel = std::make_unique<IDCardPanel>();
-    m_cameraPanel = std::make_unique<CameraPanel>();
-    m_signaturePanel = std::make_unique<SignaturePanel>();
-    
-    // 设置设备到面板
-    if (m_idCardReader) {
-        m_idCardPanel->SetIDCardReader(m_idCardReader);
-    }
-    
-    // 设置设备到面板
-    if (m_cameraManager) {
-        m_cameraPanel->SetCameraManager(m_cameraManager);
-    }
-    
-    // 设置设备到面板
-    if (m_signaturePad) {
-        m_signaturePanel->SetSignaturePad(m_signaturePad);
-    }
+    // 初始化面板
+    InitializePanels();
     
     // 应用亮色主题
     Theme::Instance().ApplyLightTheme();
@@ -55,8 +36,8 @@ bool MainWindow::Initialize() {
     return true;
 }
 
-void MainWindow::InitializeDevices() {
-    LOG_INFO("Initializing devices");
+void MainWindow::InitializePanels() {
+    LOG_INFO("Initializing panels");
     
     // 创建摄像头管理器
     m_cameraManager = std::make_shared<Plugins::CameraManager>();
@@ -66,29 +47,15 @@ void MainWindow::InitializeDevices() {
         LOG_WARNING("Failed to create or initialize camera manager");
     }
     
-    // 创建身份证阅读器设备
-    m_idCardReader = DeviceFactory::CreateIDCardReader("default");
-    if (m_idCardReader) {
-        if (m_idCardReader->Initialize()) {
-            LOG_INFO("ID Card Reader device created and initialized successfully");
-        } else {
-            LOG_WARNING("Failed to initialize ID Card Reader device");
-        }
-    } else {
-        LOG_WARNING("Failed to create ID Card Reader device");
-    }
+    // 创建各个面板
+    m_idCardPanel = std::make_unique<IDCardPanel>();
+    m_cameraPanel = std::make_unique<CameraPanel>();
+    m_signaturePanel = std::make_unique<SignaturePanel>();
     
-    // 创建手写屏设备
-    m_signaturePad = DeviceFactory::CreateSignaturePad("default");
-    if (m_signaturePad) {
-        if (m_signaturePad->Initialize()) {
-            LOG_INFO("Signature Pad device created and initialized successfully");
-        } else {
-            LOG_WARNING("Failed to initialize Signature Pad device");
-        }
-    } else {
-        LOG_WARNING("Failed to create Signature Pad device");
-    }
+    // 设置设备到面板
+    m_cameraPanel->SetCameraManager(m_cameraManager);
+    
+    LOG_INFO("Panels initialized successfully");
 }
 
 void MainWindow::Show() {
@@ -177,102 +144,79 @@ void MainWindow::RenderMenuBar() {
 }
 
 void MainWindow::RenderMainContent() {
-    // 获取整个窗口的可用区域（减去菜单栏和状态栏的高度）
+    // 获取整个窗口的可用区域
     ImVec2 windowSize = ImGui::GetContentRegionAvail();
     
-    // 设置最小尺寸限制
-    const float minWidth = 800.0f;
-    const float minHeight = 600.0f;
-    const float minPanelWidth = 200.0f;
-    const float minDebugHeight = 120.0f;
+    // 使用布局管理器计算布局
+    LayoutManager::LayoutMode mode = m_layoutManager.CalculateMode(windowSize);
+    bool useVerticalLayout = m_layoutManager.ShouldUseVerticalLayout(windowSize);
+    float debugHeight = m_layoutManager.CalculateDebugHeight(windowSize);
     
-    // 如果窗口太小，使用垂直堆叠布局
-    bool useVerticalLayout = (windowSize.x < minWidth || windowSize.y < minHeight);
+    // 计算主面板布局
+    auto mainPanelLayout = m_layoutManager.CalculateMainPanelLayout(windowSize, debugHeight);
+    auto debugPanelLayout = m_layoutManager.CalculateDebugPanelLayout(windowSize, debugHeight);
     
-    float panelHeight, debugHeight, panelWidth;
+    // 设备面板数量
+    const int panelCount = 3;
     
+    // 渲染设备面板
     if (useVerticalLayout) {
-        // 垂直堆叠布局：设备面板在上，调试面板在下
-        debugHeight = std::max(minDebugHeight, windowSize.y * 0.25f);
-        panelHeight = windowSize.y - debugHeight;
-        panelWidth = windowSize.x; // 每个面板占满宽度
+        for (int i = 0; i < panelCount; ++i) {
+            auto panelLayout = m_layoutManager.CalculateDevicePanelLayout(i, mainPanelLayout, true);
+            const char* panelNames[] = {"身份证阅读器", "摄像头/高拍仪", "手写屏"};
+            
+            ImGui::SetNextWindowPos(panelLayout.position, ImGuiCond_Always);
+            ImGui::SetNextWindowSize(panelLayout.size, ImGuiCond_Always);
+            
+            ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | 
+                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+            
+            if (ImGui::Begin(panelNames[i], nullptr, flags)) {
+                switch (i) {
+                    case 0:
+                        if (m_idCardPanel) m_idCardPanel->Render();
+                        break;
+                    case 1:
+                        if (m_cameraPanel) m_cameraPanel->Render();
+                        break;
+                    case 2:
+                        if (m_signaturePanel) m_signaturePanel->Render();
+                        break;
+                }
+            }
+            ImGui::End();
+        }
     } else {
-        // 水平布局：三个设备面板并排，调试面板在下方
-        debugHeight = std::max(minDebugHeight, windowSize.y * 0.2f);
-        panelHeight = windowSize.y - debugHeight;
-        panelWidth = std::max(minPanelWidth, windowSize.x / 3.0f);
+        for (int i = 0; i < panelCount; ++i) {
+            auto panelLayout = m_layoutManager.CalculateDevicePanelLayout(i, mainPanelLayout, false);
+            const char* panelNames[] = {"身份证阅读器", "摄像头/高拍仪", "手写屏"};
+            
+            ImGui::SetNextWindowPos(panelLayout.position, ImGuiCond_Always);
+            ImGui::SetNextWindowSize(panelLayout.size, ImGuiCond_Always);
+            
+            ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | 
+                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+            
+            if (ImGui::Begin(panelNames[i], nullptr, flags)) {
+                switch (i) {
+                    case 0:
+                        if (m_idCardPanel) m_idCardPanel->Render();
+                        break;
+                    case 1:
+                        if (m_cameraPanel) m_cameraPanel->Render();
+                        break;
+                    case 2:
+                        if (m_signaturePanel) m_signaturePanel->Render();
+                        break;
+                }
+            }
+            ImGui::End();
+        }
     }
     
-    // 设备面板布局
-    if (useVerticalLayout) {
-        // 垂直堆叠布局：每个面板占满宽度，垂直排列
-        float singlePanelHeight = panelHeight / 3.0f;
-        
-        // 身份证阅读器面板 - 顶部
-        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(panelWidth, singlePanelHeight), ImGuiCond_Always);
-        if (ImGui::Begin("身份证阅读器", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-            if (m_idCardPanel) {
-                m_idCardPanel->Render();
-            }
-        }
-        ImGui::End();
-        
-        // 摄像头面板 - 中间
-        ImGui::SetNextWindowPos(ImVec2(0, singlePanelHeight), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(panelWidth, singlePanelHeight), ImGuiCond_Always);
-        if (ImGui::Begin("摄像头/高拍仪", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-            if (m_cameraPanel) {
-                m_cameraPanel->Render();
-            }
-        }
-        ImGui::End();
-        
-        // 手写屏面板 - 底部
-        ImGui::SetNextWindowPos(ImVec2(0, singlePanelHeight * 2), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(panelWidth, singlePanelHeight), ImGuiCond_Always);
-        if (ImGui::Begin("手写屏", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-            if (m_signaturePanel) {
-                m_signaturePanel->Render();
-            }
-        }
-        ImGui::End();
-    } else {
-        // 水平布局：三个设备面板并排排列
-        // 身份证阅读器面板 - 左侧
-        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(panelWidth, panelHeight), ImGuiCond_Always);
-        if (ImGui::Begin("身份证阅读器", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-            if (m_idCardPanel) {
-                m_idCardPanel->Render();
-            }
-        }
-        ImGui::End();
-        
-        // 摄像头面板 - 中间
-        ImGui::SetNextWindowPos(ImVec2(panelWidth, 0), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(panelWidth, panelHeight), ImGuiCond_Always);
-        if (ImGui::Begin("摄像头/高拍仪", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-            if (m_cameraPanel) {
-                m_cameraPanel->Render();
-            }
-        }
-        ImGui::End();
-        
-        // 手写屏面板 - 右侧
-        ImGui::SetNextWindowPos(ImVec2(panelWidth * 2, 0), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(panelWidth, panelHeight), ImGuiCond_Always);
-        if (ImGui::Begin("手写屏", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-            if (m_signaturePanel) {
-                m_signaturePanel->Render();
-            }
-        }
-        ImGui::End();
-    }
-    
-    // 下方：调试信息窗口，填充满整个宽度
-    ImGui::SetNextWindowPos(ImVec2(0, panelHeight), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(windowSize.x, debugHeight), ImGuiCond_Always);
+    // 渲染调试信息面板
+    ImGui::SetNextWindowPos(debugPanelLayout.position, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(debugPanelLayout.size, ImGuiCond_Always);
     if (ImGui::Begin("调试信息", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
         RenderDebugInfo();
     }
@@ -280,30 +224,15 @@ void MainWindow::RenderMainContent() {
 }
 
 void MainWindow::RenderStatusBar() {
+    // 获取设备状态
+    auto status = DeviceManager::Instance().GetStatus();
+    
     // 简化的状态栏
     ImGui::Separator();
-    ImGui::Text("就绪 | 设备状态: 未连接 | 版本: 1.0.0 | AsTestTool v1.0");
-}
-
-MainWindow::DeviceStatus MainWindow::GetDeviceStatus() const {
-    DeviceStatus status;
-    
-    // 获取摄像头状态
-    if (m_cameraManager) {
-        status.cameraConnected = m_cameraManager->IsCameraOpen();
-    }
-    
-    // 获取身份证阅读器状态
-    if (m_idCardReader) {
-        status.idCardConnected = m_idCardReader->IsConnected();
-    }
-    
-    // 获取手写屏状态
-    if (m_signaturePad) {
-        status.signatureConnected = m_signaturePad->IsConnected();
-    }
-    
-    return status;
+    ImGui::Text("就绪 | ID卡: %s | 摄像头: %s | 手写屏: %s | 版本: 1.0.0",
+        status.idCardConnected ? "已连接" : "未连接",
+        status.cameraConnected ? "已连接" : "未连接",
+        status.signatureConnected ? "已连接" : "未连接");
 }
 
 void MainWindow::RenderDebugInfo() {
@@ -312,7 +241,7 @@ void MainWindow::RenderDebugInfo() {
     ImGui::Separator();
     
     // 获取统一的设备状态
-    DeviceStatus status = GetDeviceStatus();
+    auto status = DeviceManager::Instance().GetStatus();
     
     // 设备状态
     ImGui::Text("设备状态:");
