@@ -23,7 +23,8 @@ LayoutManager::LayoutMode LayoutManager::CalculateMode(const ImVec2& windowSize)
 
 float LayoutManager::CalculateDebugHeight(const ImVec2& windowSize) {
     float debugHeight = windowSize.y * m_config.debugPanelRatio;
-    return std::max(m_config.minDebugHeight, debugHeight);
+    float maxDebugHeight = std::max(0.0f, windowSize.y - m_config.minPanelHeight);
+    return std::clamp(debugHeight, 0.0f, maxDebugHeight);
 }
 
 bool LayoutManager::ShouldUseVerticalLayout(const ImVec2& windowSize) {
@@ -55,18 +56,21 @@ LayoutManager::PanelLayout LayoutManager::CalculateDevicePanelLayout(int index, 
     PanelLayout layout;
     
     if (useVertical) {
-        // 垂直布局：每个面板占满宽度，垂直排列
-        float singleHeight = mainPanel.size.y / 3.0f;
-        singleHeight = std::max(m_config.minPanelHeight, singleHeight);
+        float singleHeight = std::max(1.0f, mainPanel.size.y / 3.0f);
+        float yOffset = index * singleHeight;
+        float remainingHeight = std::max(0.0f, mainPanel.size.y - yOffset);
+        float panelHeight = (index == 2) ? remainingHeight : std::min(singleHeight, remainingHeight);
         
-        layout.position = ImVec2(0, mainPanel.position.y + index * singleHeight);
-        layout.size = ImVec2(mainPanel.size.x, singleHeight);
+        layout.position = ImVec2(mainPanel.position.x, mainPanel.position.y + yOffset);
+        layout.size = ImVec2(mainPanel.size.x, panelHeight);
     } else {
-        // 水平布局：三个面板并排
         float panelWidth = GetPanelWidth(mainPanel.size.x, 3);
+        float xOffset = index * panelWidth;
+        float remainingWidth = std::max(0.0f, mainPanel.size.x - xOffset);
+        float actualWidth = (index == 2) ? remainingWidth : std::min(panelWidth, remainingWidth);
         
-        layout.position = ImVec2(mainPanel.position.x + index * panelWidth, mainPanel.position.y);
-        layout.size = ImVec2(panelWidth, mainPanel.size.y);
+        layout.position = ImVec2(mainPanel.position.x + xOffset, mainPanel.position.y);
+        layout.size = ImVec2(actualWidth, mainPanel.size.y);
     }
     
     layout.contentSize = layout.size;

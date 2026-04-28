@@ -6,7 +6,7 @@
 namespace AsTestTool {
 namespace Plugins {
 
-// 分辨率结构
+// 分辨率
 struct Resolution {
     int width;
     int height;
@@ -22,13 +22,14 @@ enum class PixelFormat {
     YUV420,
     YUV422,
     RGB24,
+    BGR24,
     RGB32,
     MJPG,
     H264,
     Unknown
 };
 
-// 摄像头信息结构
+// 相机信息结构
 struct CameraInfo {
     std::string id;
     std::string name;
@@ -40,7 +41,7 @@ struct CameraInfo {
     CameraInfo() : isAvailable(false) {}
 };
 
-// 摄像头插件接口
+// 相机接口
 class ICameraPlugin {
 public:
     virtual ~ICameraPlugin() = default;
@@ -55,7 +56,7 @@ public:
     virtual void Shutdown() = 0;
     virtual std::vector<CameraInfo> GetAvailableCameras() = 0;
     
-    // 摄像头操作
+    // 相机管理
     virtual bool OpenCamera(const std::string& cameraId) = 0;
     virtual bool CloseCamera() = 0;
     virtual bool IsCameraOpen() const = 0;
@@ -70,14 +71,14 @@ public:
                              PixelFormat& format, 
                              int& width, int& height) = 0;
     
-    // 设置控制
+    // 设置参数
     virtual bool SetResolution(int width, int height, int fps) = 0;
     virtual bool SetPixelFormat(PixelFormat format) = 0;
     virtual bool SetBrightness(int value) = 0;
     virtual bool SetContrast(int value) = 0;
     virtual bool SetSaturation(int value) = 0;
     
-    // 错误处理
+    // 错误信息
     virtual std::string GetLastError() const = 0;
     virtual int GetLastErrorCode() const = 0;
 };
@@ -90,7 +91,7 @@ public:
     virtual std::string GetPluginType() const = 0;
 };
 
-// 导出函数类型定义
+// External C interface
 extern "C" {
     typedef IPluginFactory* (*CreateFactoryFunc)();
     typedef void (*DestroyFactoryFunc)(IPluginFactory*);

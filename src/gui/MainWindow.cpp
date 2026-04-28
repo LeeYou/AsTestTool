@@ -79,21 +79,36 @@ void MainWindow::Render() {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | 
                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                                    ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
-                                   ImGuiWindowFlags_NoBackground;
+                                   ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_MenuBar;
     
-    if (ImGui::Begin("MainWindow", nullptr, window_flags)) {
+    bool isOpen = ImGui::Begin("MainWindow", nullptr, window_flags);
+    ImGui::PopStyleVar(3);
+    if (isOpen) {
         // 渲染菜单栏
         RenderMenuBar();
         
+        const ImGuiStyle& style = ImGui::GetStyle();
+        const float statusBarHeight = ImGui::GetTextLineHeightWithSpacing() + style.FramePadding.y * 2.0f + style.ItemSpacing.y * 2.0f;
+        
+        ImGui::BeginChild("MainWorkspace", ImVec2(0.0f, -statusBarHeight), false,
+                          ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        
         // 渲染主内容
         RenderMainContent();
+        ImGui::EndChild();
         
         // 渲染状态栏
+        ImGui::BeginChild("StatusBarRegion", ImVec2(0.0f, statusBarHeight), false,
+                          ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         RenderStatusBar();
+        ImGui::EndChild();
     }
     ImGui::End();
 }
@@ -144,11 +159,11 @@ void MainWindow::RenderMenuBar() {
 }
 
 void MainWindow::RenderMainContent() {
-    // 获取整个窗口的可用区域
+    ImVec2 contentOrigin = ImGui::GetCursorScreenPos();
     ImVec2 windowSize = ImGui::GetContentRegionAvail();
     
     // 使用布局管理器计算布局
-    LayoutManager::LayoutMode mode = m_layoutManager.CalculateMode(windowSize);
+    m_layoutManager.CalculateMode(windowSize);
     bool useVerticalLayout = m_layoutManager.ShouldUseVerticalLayout(windowSize);
     float debugHeight = m_layoutManager.CalculateDebugHeight(windowSize);
     
@@ -165,7 +180,7 @@ void MainWindow::RenderMainContent() {
             auto panelLayout = m_layoutManager.CalculateDevicePanelLayout(i, mainPanelLayout, true);
             const char* panelNames[] = {"身份证阅读器", "摄像头/高拍仪", "手写屏"};
             
-            ImGui::SetNextWindowPos(panelLayout.position, ImGuiCond_Always);
+            ImGui::SetNextWindowPos(ImVec2(contentOrigin.x + panelLayout.position.x, contentOrigin.y + panelLayout.position.y), ImGuiCond_Always);
             ImGui::SetNextWindowSize(panelLayout.size, ImGuiCond_Always);
             
             ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | 
@@ -191,7 +206,7 @@ void MainWindow::RenderMainContent() {
             auto panelLayout = m_layoutManager.CalculateDevicePanelLayout(i, mainPanelLayout, false);
             const char* panelNames[] = {"身份证阅读器", "摄像头/高拍仪", "手写屏"};
             
-            ImGui::SetNextWindowPos(panelLayout.position, ImGuiCond_Always);
+            ImGui::SetNextWindowPos(ImVec2(contentOrigin.x + panelLayout.position.x, contentOrigin.y + panelLayout.position.y), ImGuiCond_Always);
             ImGui::SetNextWindowSize(panelLayout.size, ImGuiCond_Always);
             
             ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | 
@@ -215,7 +230,7 @@ void MainWindow::RenderMainContent() {
     }
     
     // 渲染调试信息面板
-    ImGui::SetNextWindowPos(debugPanelLayout.position, ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(contentOrigin.x + debugPanelLayout.position.x, contentOrigin.y + debugPanelLayout.position.y), ImGuiCond_Always);
     ImGui::SetNextWindowSize(debugPanelLayout.size, ImGuiCond_Always);
     if (ImGui::Begin("调试信息", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
         RenderDebugInfo();
@@ -229,6 +244,7 @@ void MainWindow::RenderStatusBar() {
     
     // 简化的状态栏
     ImGui::Separator();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text("就绪 | ID卡: %s | 摄像头: %s | 手写屏: %s | 版本: 1.0.0",
         status.idCardConnected ? "已连接" : "未连接",
         status.cameraConnected ? "已连接" : "未连接",

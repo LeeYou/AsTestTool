@@ -66,12 +66,12 @@ DirectShowCamera::DirectShowCamera()
     , m_currentWidth(640)
     , m_currentHeight(480)
     , m_currentFps(30)
-    , m_currentFormat(PixelFormat::YUV420)
+    , m_currentFormat(PixelFormat::BGR24)
     , m_camerasEnumerated(false)
     , m_autoFlipImage(true)  // 默认启用自动翻转
-    , m_autoColorCorrection(true)  // 默认启用颜色校正
-    , m_convertBGRToRGB(true)      // 默认转换BGR到RGB
-    , m_gammaValue(1.2f)          // 默认伽马值
+    , m_autoColorCorrection(false)  // 禁用颜色校正，用于测试原始数据
+    , m_convertBGRToRGB(false)     // 禁用所有转换，直接输出原始数据用于调试
+    , m_gammaValue(1.0f)          // 默认伽马值
     , m_detectedColorFormat(ColorFormat::Unknown)  // 未检测
     , m_colorFormatDetected(false)                 // 未检测
     , m_adaptiveCorrection(false)                  // 暂时禁用自适应校正，避免崩溃
@@ -216,7 +216,7 @@ bool DirectShowCamera::OpenCamera(const std::string& cameraId) {
         m_currentWidth = 640;
         m_currentHeight = 480;
         m_currentFps = 30;
-        m_currentFormat = PixelFormat::RGB24;
+        m_currentFormat = PixelFormat::BGR24;
         
         // 创建过滤器图
         if (!CreateFilterGraph()) {
@@ -479,6 +479,21 @@ bool DirectShowCamera::CaptureImage(std::vector<uint8_t>& imageData,
                     std::vector<uint8_t> buffer(bufferSize);
                     hr = m_sampleGrabber->GetCurrentBuffer(&bufferSize, (long*)buffer.data());
                     if (SUCCEEDED(hr)) {
+                        // 记录缓冲区大小，用于诊断格式问题
+                        size_t expectedRGB24 = (size_t)width * height * 3;
+                        size_t expectedYUV422 = (size_t)width * height * 2;
+                        size_t expectedYUV420 = (size_t)width * height * 3 / 2;
+                        
+                        std::string formatGuess = "Unknown";
+                        if (bufferSize == expectedRGB24) formatGuess = "RGB24 or BGR24";
+                        else if (bufferSize == expectedYUV422) formatGuess = "YUV422";
+                        else if (bufferSize == expectedYUV420) formatGuess = "YUV420";
+                        
+                        LOG_INFO("Buffer received: size=" + std::to_string(bufferSize) + 
+                                ", expected RGB24=" + std::to_string(expectedRGB24) +
+                                ", YUV422=" + std::to_string(expectedYUV422) +
+                                ", guessed format: " + formatGuess);
+                        
                         // 检查数据有效性
                         if (!IsValidImageData(buffer.data(), bufferSize, width, height)) {
                             LOG_WARNING("Invalid image data detected, skipping frame");
@@ -505,6 +520,10 @@ bool DirectShowCamera::CaptureImage(std::vector<uint8_t>& imageData,
                             LOG_WARNING("Color correction failed: " + std::string(e.what()) + ", skipping correction");
                         } catch (...) {
                             LOG_WARNING("Unknown error in color correction, skipping correction");
+                        }
+                        
+                        if (m_autoColorCorrection && m_convertBGRToRGB && format == PixelFormat::BGR24) {
+                            format = PixelFormat::RGB24;
                         }
                         
                         // 更新帧统计
@@ -619,6 +638,7 @@ bool DirectShowCamera::CaptureImage(std::vector<uint8_t>& imageData,
             }
         }
         
+        format = PixelFormat::RGB24;
         return true;
         
     } catch (const std::exception& e) {
@@ -848,7 +868,7 @@ bool DirectShowCamera::EnumerateCameras() {
                         // 添加支持的像素格式
                         camera.supportedFormats = {
                             PixelFormat::YUV420,
-                            PixelFormat::RGB24,
+                            PixelFormat::BGR24,
                             PixelFormat::MJPG
                         };
                         
@@ -973,7 +993,9 @@ bool DirectShowCamera::ConfigureSampleGrabber() {
             return false;
         }
         
-        // 设置媒体类型为RGB24
+        // 设置媒体类型为 RGB24
+        // 注意：虽然使用 RGB24 类型，但摄像头实际输出的是 BGR 顺序的数据
+        // OpenGL 原生支持 GL_BGR 格式，无需转换
         AM_MEDIA_TYPE mt;
         ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
         mt.majortype = MEDIATYPE_Video;
@@ -1052,6 +1074,9 @@ bool DirectShowCamera::SetMediaType(int width, int height, int fps, PixelFormat 
             return false;
         }
         
+        // 获取目标格式对应的 GUID
+        GUID targetSubtype = PixelFormatToGUID(format);
+        
         AM_MEDIA_TYPE* targetMediaType = nullptr;
         bool found = false;
         
@@ -1066,8 +1091,10 @@ bool DirectShowCamera::SetMediaType(int width, int height, int fps, PixelFormat 
                     int w = videoInfo->bmiHeader.biWidth;
                     int h = abs(videoInfo->bmiHeader.biHeight);
                     
-                    if (w == width && h == height) {
-                        LOG_INFO("Found matching media type: " + std::to_string(w) + "x" + std::to_string(h));
+                    // 同时匹配分辨率和格式
+                    if (w == width && h == height && mediaType->subtype == targetSubtype) {
+                        LOG_INFO("Found matching media type: " + std::to_string(w) + "x" + std::to_string(h) + 
+                                ", format: " + GetFormatName(targetSubtype));
                         targetMediaType = mediaType;
                         found = true;
                         break;
@@ -1076,6 +1103,44 @@ bool DirectShowCamera::SetMediaType(int width, int height, int fps, PixelFormat 
                 
                 if (!found) {
                     DeleteMediaType(mediaType);
+                }
+            }
+        }
+        
+        // 如果没找到指定格式，尝试只按分辨率匹配，记录实际格式
+        if (!found) {
+            LOG_WARNING("No media type found for format " + GetFormatName(targetSubtype) + 
+                       " at " + std::to_string(width) + "x" + std::to_string(height) + 
+                       ", searching for any matching resolution...");
+            
+            for (int i = 0; i < count; i++) {
+                AM_MEDIA_TYPE* mediaType = nullptr;
+                BYTE caps[256] = {0};
+                
+                hr = streamConfig->GetStreamCaps(i, &mediaType, caps);
+                if (SUCCEEDED(hr) && mediaType && mediaType->pbFormat) {
+                    if (mediaType->formattype == FORMAT_VideoInfo) {
+                        VIDEOINFOHEADER* videoInfo = (VIDEOINFOHEADER*)mediaType->pbFormat;
+                        int w = videoInfo->bmiHeader.biWidth;
+                        int h = abs(videoInfo->bmiHeader.biHeight);
+                        
+                        if (w == width && h == height) {
+                            // 找到分辨率匹配，记录实际格式
+                            LOG_WARNING("Using fallback format: " + GetFormatName(mediaType->subtype) + 
+                                       " at " + std::to_string(w) + "x" + std::to_string(h) + 
+                                       " (requested: " + GetFormatName(targetSubtype) + ")");
+                            targetMediaType = mediaType;
+                            found = true;
+                            
+                            // 更新实际使用的格式
+                            m_currentFormat = GUIDToPixelFormat(mediaType->subtype);
+                            break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        DeleteMediaType(mediaType);
+                    }
                 }
             }
         }
@@ -1136,6 +1201,7 @@ GUID DirectShowCamera::PixelFormatToGUID(PixelFormat format) const {
     switch (format) {
         case PixelFormat::YUV420: return MEDIASUBTYPE_420O;
         case PixelFormat::YUV422: return MEDIASUBTYPE_YUY2;
+        case PixelFormat::BGR24:
         case PixelFormat::RGB24: return MEDIASUBTYPE_RGB24;
         case PixelFormat::RGB32: return MEDIASUBTYPE_RGB32;
         case PixelFormat::MJPG: return MEDIASUBTYPE_MJPG;
@@ -1146,10 +1212,22 @@ GUID DirectShowCamera::PixelFormatToGUID(PixelFormat format) const {
 PixelFormat DirectShowCamera::GUIDToPixelFormat(const GUID& guid) const {
     if (guid == MEDIASUBTYPE_420O) return PixelFormat::YUV420;
     if (guid == MEDIASUBTYPE_YUY2) return PixelFormat::YUV422;
-    if (guid == MEDIASUBTYPE_RGB24) return PixelFormat::RGB24;
+    if (guid == MEDIASUBTYPE_RGB24) return PixelFormat::BGR24;
     if (guid == MEDIASUBTYPE_RGB32) return PixelFormat::RGB32;
     if (guid == MEDIASUBTYPE_MJPG) return PixelFormat::MJPG;
     return PixelFormat::Unknown;
+}
+
+std::string DirectShowCamera::GetFormatName(const GUID& guid) const {
+    if (guid == MEDIASUBTYPE_420O) return "YUV420";
+    if (guid == MEDIASUBTYPE_YUY2) return "YUV422";
+    if (guid == MEDIASUBTYPE_RGB24) return "BGR24";
+    if (guid == MEDIASUBTYPE_RGB32) return "RGB32";
+    if (guid == MEDIASUBTYPE_MJPG) return "MJPG";
+    if (guid == MEDIASUBTYPE_IYUV) return "IYUV";
+    if (guid == MEDIASUBTYPE_YV12) return "YV12";
+    if (guid == MEDIASUBTYPE_YUYV) return "YUYV";
+    return "Unknown";
 }
 
 // DirectShowFactory 实现
@@ -1453,15 +1531,16 @@ void DirectShowCamera::ApplyColorCorrection(uint8_t* imageData, int width, int h
     }
     
     // 1. 转换BGR到RGB（如果需要）
+    // DirectShow摄像头输出BGR格式，需要转换为RGB供OpenGL使用
     if (m_convertBGRToRGB) {
         ConvertBGRToRGB(imageData, width, height);
+        LOG_INFO("Applied BGR to RGB conversion");
     }
     
     // 2. 应用伽马校正
     ApplyGammaCorrection(imageData, width, height, m_gammaValue);
     
-    LOG_INFO("Color correction applied: BGR->RGB=" + std::to_string(m_convertBGRToRGB) + 
-             ", Gamma=" + std::to_string(m_gammaValue));
+    LOG_INFO("Color correction applied: BGR->RGB conversion enabled, Gamma=" + std::to_string(m_gammaValue));
 }
 
 void DirectShowCamera::ConvertBGRToRGB(uint8_t* imageData, int width, int height) {
@@ -1512,7 +1591,7 @@ bool DirectShowCamera::DetectColorFormat() {
         HRESULT hr = m_cameraFilter->QueryInterface(IID_IAMStreamConfig, (void**)&m_streamConfig);
         if (FAILED(hr) || !m_streamConfig) {
             LOG_WARNING("Cannot get stream config interface, using default RGB24 format");
-            m_detectedColorFormat = ColorFormat::RGB24;
+            m_detectedColorFormat = ColorFormat::BGR24;
             m_colorFormatDetected = true;
             return true;
         }
@@ -1524,7 +1603,7 @@ bool DirectShowCamera::DetectColorFormat() {
         HRESULT hr = m_streamConfig->GetFormat(&pmt);
         if (FAILED(hr) || !pmt) {
             LOG_WARNING("Failed to get media type for color format detection, using default RGB24");
-            m_detectedColorFormat = ColorFormat::RGB24;
+            m_detectedColorFormat = ColorFormat::BGR24;
             m_colorFormatDetected = true;
             return true;
         }
@@ -1532,8 +1611,8 @@ bool DirectShowCamera::DetectColorFormat() {
         // 分析媒体类型
         if (pmt->majortype == MEDIATYPE_Video) {
             if (pmt->subtype == MEDIASUBTYPE_RGB24) {
-                m_detectedColorFormat = ColorFormat::RGB24;
-                LOG_INFO("Detected color format: RGB24");
+                m_detectedColorFormat = ColorFormat::BGR24;
+                LOG_INFO("Detected color format: BGR24");
             } else if (pmt->subtype == MEDIASUBTYPE_RGB32) {
                 m_detectedColorFormat = ColorFormat::RGB24;  // 当作RGB24处理
                 LOG_INFO("Detected color format: RGB32 (treated as RGB24)");

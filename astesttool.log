@@ -1,0 +1,942 @@
+[2026-04-28 14:48:07.559] [INFO ] === AsTestTool Starting ===
+[2026-04-28 14:48:07.560] [INFO ] Version: 1.0.0
+[2026-04-28 14:48:07.560] [INFO ] Platform: Windows
+[2026-04-28 14:48:07.560] [INFO ] Application constructor called
+[2026-04-28 14:48:07.560] [INFO ] Initializing application
+[2026-04-28 14:48:07.561] [INFO ] Setting default configuration
+[2026-04-28 14:48:07.561] [INFO ] Initializing devices via DeviceManager
+[2026-04-28 14:48:07.561] [INFO ] DeviceManager: Initializing all devices
+[2026-04-28 14:48:07.561] [INFO ] Creating ID card reader, type: default
+[2026-04-28 14:48:07.561] [INFO ] LibraryLoader created
+[2026-04-28 14:48:07.561] [INFO ] WindowsIDCardReader created, type: default
+[2026-04-28 14:48:07.561] [INFO ] Initializing Windows ID card reader
+[2026-04-28 14:48:07.561] [INFO ] Trying to load system library: CMCC_IDCARD.DLL
+[2026-04-28 14:48:07.561] [INFO ] Loading ID card reader library: CMCC_IDCARD.DLL
+[2026-04-28 14:48:07.561] [INFO ] Loading library: CMCC_IDCARD.DLL
+[2026-04-28 14:48:07.563] [INFO ] Library loaded successfully: CMCC_IDCARD.DLL
+[2026-04-28 14:48:07.563] [INFO ] Library loaded successfully: CMCC_IDCARD.DLL
+[2026-04-28 14:48:07.563] [INFO ] Successfully loaded ID card reader library from system: CMCC_IDCARD.DLL
+[2026-04-28 14:48:07.563] [INFO ] Windows ID card reader initialized successfully
+[2026-04-28 14:48:07.563] [INFO ] DeviceManager: ID card reader initialized successfully
+[2026-04-28 14:48:07.563] [INFO ] Creating camera
+[2026-04-28 14:48:07.563] [INFO ] WindowsCamera created
+[2026-04-28 14:48:07.564] [INFO ] Initializing Windows camera
+[2026-04-28 14:48:07.564] [INFO ] DeviceManager: Camera initialized successfully
+[2026-04-28 14:48:07.564] [INFO ] Creating signature pad, type: default
+[2026-04-28 14:48:07.564] [INFO ] WindowsSignaturePad created, type: default
+[2026-04-28 14:48:07.564] [INFO ] LibraryLoader created
+[2026-04-28 14:48:07.564] [INFO ] Initializing Windows signature pad
+[2026-04-28 14:48:07.564] [INFO ] Trying to load system library: CMCC_SIGN.DLL
+[2026-04-28 14:48:07.564] [INFO ] Loading signature pad library: CMCC_SIGN.DLL
+[2026-04-28 14:48:07.564] [INFO ] Loading library: CMCC_SIGN.DLL
+[2026-04-28 14:48:07.565] [ERROR] Failed to load library: CMCC_SIGN.DLL, error code: 126
+[2026-04-28 14:48:07.565] [ERROR] Error details: 找不到指定的模块。
+
+[2026-04-28 14:48:07.565] [ERROR] Failed to load library: CMCC_SIGN.DLL
+[2026-04-28 14:48:07.565] [WARN ] Failed to load system library: CMCC_SIGN.DLL
+[2026-04-28 14:48:07.565] [WARN ] Failed to load signature pad library from any default location
+[2026-04-28 14:48:07.565] [INFO ] You can use 'Load Library' button to select a custom DLL
+[2026-04-28 14:48:07.565] [INFO ] DeviceManager: Signature pad initialized successfully
+[2026-04-28 14:48:07.566] [INFO ] DeviceManager: All devices initialized successfully
+[2026-04-28 14:48:07.566] [INFO ] Devices initialized successfully
+[2026-04-28 14:48:07.566] [INFO ] Initializing GUI
+[2026-04-28 14:48:07.566] [INFO ] Initializing GLFW
+[2026-04-28 14:48:07.826] [INFO ] GLFW initialized successfully
+[2026-04-28 14:48:07.826] [INFO ] Initializing OpenGL
+[2026-04-28 14:48:07.826] [INFO ] OpenGL initialized successfully
+[2026-04-28 14:48:07.826] [INFO ] Initializing ImGui
+[2026-04-28 14:48:07.827] [INFO ] Setting up Chinese fonts
+[2026-04-28 14:48:07.827] [INFO ] Loading Chinese font: C:/Windows/Fonts/msyh.ttc
+[2026-04-28 14:48:07.838] [INFO ] Chinese font loaded successfully: C:/Windows/Fonts/msyh.ttc
+[2026-04-28 14:48:07.839] [INFO ] Font atlas built successfully
+[2026-04-28 14:48:07.839] [INFO ] Font setup completed
+[2026-04-28 14:48:07.839] [INFO ] ImGui initialized successfully
+[2026-04-28 14:48:07.839] [INFO ] MainWindow created
+[2026-04-28 14:48:07.839] [INFO ] Initializing MainWindow
+[2026-04-28 14:48:07.839] [INFO ] Initializing panels
+[2026-04-28 14:48:07.839] [INFO ] Detected platform: Windows
+[2026-04-28 14:48:07.839] [INFO ] Loading plugin: DirectShowPlugin from H:\work\Demo\Demo072\AsTestTool\build\Debug/plugins/windows/DirectShowPlugin.dll
+[2026-04-28 14:48:07.841] [INFO ] Successfully loaded plugin: DirectShowPlugin from H:\work\Demo\Demo072\AsTestTool\build\Debug/plugins/windows/DirectShowPlugin.dll
+[2026-04-28 14:48:07.952] [INFO ] Successfully loaded and initialized plugin: DirectShowPlugin
+[2026-04-28 14:48:07.953] [INFO ] CameraManager initialized successfully
+[2026-04-28 14:48:07.953] [INFO ] Camera manager created and initialized successfully
+[2026-04-28 14:48:07.953] [INFO ] IDCardPanel created
+[2026-04-28 14:48:07.953] [INFO ] CameraPanel created
+[2026-04-28 14:48:07.953] [INFO ] TextureRenderer: Initialized successfully
+[2026-04-28 14:48:07.953] [INFO ] SignaturePanel created
+[2026-04-28 14:48:07.953] [INFO ] Setting camera manager...
+[2026-04-28 14:48:07.953] [INFO ] Camera manager set successfully
+[2026-04-28 14:48:07.953] [INFO ] Found 1 available cameras
+[2026-04-28 14:48:07.953] [INFO ] Refreshing device list...
+[2026-04-28 14:48:07.953] [INFO ] Device list refreshed, found 1 devices
+[2026-04-28 14:48:07.953] [INFO ] Device 0: Logi C270 HD WebCam (DirectShow:camera_0)
+[2026-04-28 14:48:07.953] [INFO ] Panels initialized successfully
+[2026-04-28 14:48:07.953] [INFO ] Applying light theme
+[2026-04-28 14:48:07.953] [INFO ] GUI initialized successfully
+[2026-04-28 14:48:07.953] [INFO ] Application initialized successfully
+[2026-04-28 14:48:07.953] [INFO ] Starting application main loop
+[2026-04-28 14:48:07.953] [INFO ] Entering main loop
+[2026-04-28 14:48:10.650] [INFO ] Refreshing device list...
+[2026-04-28 14:48:10.651] [INFO ] Device list refreshed, found 1 devices
+[2026-04-28 14:48:10.651] [INFO ] Device 0: Logi C270 HD WebCam (DirectShow:camera_0)
+[2026-04-28 14:48:11.619] [INFO ] Connecting to camera...
+[2026-04-28 14:48:11.620] [INFO ] CameraManager::OpenCamera called with ID: camera_0
+[2026-04-28 14:48:11.620] [INFO ] Calling plugin OpenCamera method...
+[2026-04-28 14:48:11.640] [INFO ] Successfully opened camera: camera_0
+[2026-04-28 14:48:11.640] [INFO ] Camera connected successfully: Logi C270 HD WebCam
+[2026-04-28 14:48:12.127] [INFO ] Successfully started preview
+[2026-04-28 14:48:12.127] [INFO ] Preview started
+[2026-04-28 14:48:12.184] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.250] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.314] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.383] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.449] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.513] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.582] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.649] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.715] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.781] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.852] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.916] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:12.985] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.052] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.073] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.090] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.107] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.124] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.140] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.157] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.175] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.189] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.207] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.224] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.239] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.255] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.272] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.291] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.305] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.324] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.340] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.357] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.375] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.391] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.408] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.423] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.440] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.457] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.473] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.489] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.506] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.522] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.539] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.556] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.574] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.591] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.607] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.624] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.640] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.657] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.674] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.692] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.707] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.724] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.740] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.758] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.773] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.789] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.806] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.822] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.839] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.856] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.873] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.889] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.906] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.923] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.939] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.956] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.973] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:13.990] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.006] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.023] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.040] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.057] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.076] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.090] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.107] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.122] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.139] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.157] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.176] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.191] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.210] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.225] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.241] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.257] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.274] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.292] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.308] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.324] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.342] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.359] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.374] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.392] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.409] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.425] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.441] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.459] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.474] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.490] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.507] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.523] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.542] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.559] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.576] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.592] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.607] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.627] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.642] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.659] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.676] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.692] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.708] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.725] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.741] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.757] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.775] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.791] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.807] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.825] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.840] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.858] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.876] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.891] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.909] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.927] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.943] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.957] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.973] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:14.992] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.011] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.026] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.042] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.059] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.075] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.092] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.109] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.126] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.142] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.159] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.177] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.191] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.208] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.225] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.245] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.258] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.276] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.292] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.310] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.327] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.343] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.359] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.377] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.392] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.409] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.425] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.440] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.460] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.476] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.492] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.508] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.526] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.540] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.558] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.577] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.593] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.609] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.626] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.641] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.657] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.675] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.693] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.709] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.727] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.742] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.759] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.777] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.793] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.810] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.827] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.843] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.860] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.877] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.893] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.909] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.926] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.943] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.959] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.975] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:15.993] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.012] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.025] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.044] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.061] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.078] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.095] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.110] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.127] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.141] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.160] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.177] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.194] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.210] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.227] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.242] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.259] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.277] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.293] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.312] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.327] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.344] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.360] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.376] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.392] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.409] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.426] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.445] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.460] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.478] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.493] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.511] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.527] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.543] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.560] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.576] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.595] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.609] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.627] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.645] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.660] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.677] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.694] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.712] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.726] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.744] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.760] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.776] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.793] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.810] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.826] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.842] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.859] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.877] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.894] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.910] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.928] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.945] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.960] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.978] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:16.994] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.013] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.027] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.044] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.060] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.078] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.093] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.111] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.128] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.143] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.159] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.178] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.193] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.211] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.229] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.245] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.262] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.277] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.295] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.311] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.328] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.346] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.362] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.376] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.394] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.411] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.427] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.444] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.461] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.479] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.495] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.512] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.528] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.543] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.561] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.577] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.593] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.611] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.627] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.645] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.662] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.677] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.696] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.711] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.729] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.744] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.760] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.777] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.796] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.811] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.828] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.845] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.861] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.878] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.896] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.910] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.929] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.946] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.961] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.977] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:17.995] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.011] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.027] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.044] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.060] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.078] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.094] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.110] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.127] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.144] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.160] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.178] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.194] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.211] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.228] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.246] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.261] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.277] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.297] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.312] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.329] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.346] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.361] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.378] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.396] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.412] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.430] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.446] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.463] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.478] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.494] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.510] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.528] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.544] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.561] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.577] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.594] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.611] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.628] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.644] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.663] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.678] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.696] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.714] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.729] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.744] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.763] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.779] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.797] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.813] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.829] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.848] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.862] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.878] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.895] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.914] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.929] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.946] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.961] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.977] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:18.996] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.014] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.030] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.047] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.064] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.081] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.096] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.114] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.129] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.146] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.162] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.179] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.197] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.212] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.230] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.244] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.261] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.278] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.297] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.313] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.330] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.346] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.365] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.380] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.397] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.414] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.431] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.445] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.462] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.480] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.497] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.514] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.530] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.545] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.563] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.579] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.596] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.614] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.629] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.648] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.664] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.679] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.697] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.713] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.731] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.748] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.763] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.780] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.797] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.814] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.830] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.847] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.863] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.880] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.897] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.912] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.929] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.947] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.962] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.980] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:19.997] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.017] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.029] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.046] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.065] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.082] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.098] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.114] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.130] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.147] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.164] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.179] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.197] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.214] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.231] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.247] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.265] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.281] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.297] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.315] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.330] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.348] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.363] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.382] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.397] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.414] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.432] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.448] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.464] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.481] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.498] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.515] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.531] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.545] [INFO ] Capture button clicked
+[2026-04-28 14:48:20.547] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.547] [INFO ] Image captured successfully
+[2026-04-28 14:48:20.550] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.565] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.580] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.598] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.614] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.629] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.647] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.664] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.682] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.698] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.716] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.732] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.747] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.763] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.781] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.797] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.814] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.831] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.849] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.863] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.882] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.899] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.915] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.933] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.947] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.963] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.980] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:20.997] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.014] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.030] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.047] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.064] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.081] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.096] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.114] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.130] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.147] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.164] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.180] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.198] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.215] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.230] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.247] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.264] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.281] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.297] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.317] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.331] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.347] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.366] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.383] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.399] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.417] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.433] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.449] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.465] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.483] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.498] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.517] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.532] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.547] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.565] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.581] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.599] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.615] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.631] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.649] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.665] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.681] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.700] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.716] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.732] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.748] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.766] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.783] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.800] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.816] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.833] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.849] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.865] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.881] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.898] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.915] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.932] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.949] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.966] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.982] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:21.998] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.017] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.034] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.049] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.066] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.083] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.099] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.115] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.132] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.148] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.166] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.183] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.198] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.215] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.229] [INFO ] Capture button clicked
+[2026-04-28 14:48:22.232] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.232] [INFO ] Image captured successfully
+[2026-04-28 14:48:22.235] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.248] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.266] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.283] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.299] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.315] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.332] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.348] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.365] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.382] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.399] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.415] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.433] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.450] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.466] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.484] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.500] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.517] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.534] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.549] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.567] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.584] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.600] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.617] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.632] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.649] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.667] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.684] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.700] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.715] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.735] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.747] [INFO ] Record button clicked
+[2026-04-28 14:48:22.747] [INFO ] Recording started
+[2026-04-28 14:48:22.749] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.767] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.784] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.800] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.816] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.834] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.849] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.865] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.882] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.901] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.917] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.934] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.950] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.965] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:22.981] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.000] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.017] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.035] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.050] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.068] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.084] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.102] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.118] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.135] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.151] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.167] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.185] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.201] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.217] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.233] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.251] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.268] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.284] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.300] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.318] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.334] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.350] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.367] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.383] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.402] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.415] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.435] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.450] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.467] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.483] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.501] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.517] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.536] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.549] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.569] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.584] [INFO ] Successfully captured image: 640x480
+[2026-04-28 14:48:23.598] [INFO ] Stop preview button clicked
+[2026-04-28 14:48:23.850] [INFO ] Successfully stopped preview
+[2026-04-28 14:48:23.850] [INFO ] Preview stopped
+[2026-04-28 14:48:39.729] [INFO ] Exiting main loop
+[2026-04-28 14:48:39.730] [INFO ] Application main loop ended
+[2026-04-28 14:48:39.730] [INFO ] === AsTestTool Exiting ===
+[2026-04-28 14:48:39.730] [INFO ] Application destructor called
+[2026-04-28 14:48:39.730] [INFO ] Shutting down application
+[2026-04-28 14:48:39.730] [INFO ] Shutting down devices via DeviceManager
+[2026-04-28 14:48:39.730] [INFO ] DeviceManager: Shutting down all devices
+[2026-04-28 14:48:39.730] [INFO ] Shutting down Windows ID card reader
+[2026-04-28 14:48:39.730] [INFO ] Library unloaded
+[2026-04-28 14:48:39.730] [INFO ] Windows ID card reader shutdown complete
+[2026-04-28 14:48:39.730] [INFO ] Shutting down Windows ID card reader
+[2026-04-28 14:48:39.731] [INFO ] Windows ID card reader shutdown complete
+[2026-04-28 14:48:39.731] [INFO ] DeviceManager: ID card reader shutdown complete
+[2026-04-28 14:48:39.731] [INFO ] Shutting down Windows camera
+[2026-04-28 14:48:39.731] [INFO ] Stopping camera preview (Windows implementation)
+[2026-04-28 14:48:39.731] [INFO ] Shutting down Windows camera
+[2026-04-28 14:48:39.731] [INFO ] Stopping camera preview (Windows implementation)
+[2026-04-28 14:48:39.731] [INFO ] DeviceManager: Camera shutdown complete
+[2026-04-28 14:48:39.731] [INFO ] Shutting down Windows signature pad
+[2026-04-28 14:48:39.731] [INFO ] Stopping signature capture (Windows implementation)
+[2026-04-28 14:48:39.731] [INFO ] Closing signature pad device
+[2026-04-28 14:48:39.731] [INFO ] Shutting down Windows signature pad
+[2026-04-28 14:48:39.731] [INFO ] Stopping signature capture (Windows implementation)
+[2026-04-28 14:48:39.731] [INFO ] Closing signature pad device
+[2026-04-28 14:48:39.731] [INFO ] DeviceManager: Signature pad shutdown complete
+[2026-04-28 14:48:39.731] [INFO ] DeviceManager: All devices shutdown complete
+[2026-04-28 14:48:39.731] [INFO ] Devices shutdown complete
+[2026-04-28 14:48:39.731] [INFO ] Shutting down GUI
+[2026-04-28 14:48:39.731] [INFO ] MainWindow destroyed
+[2026-04-28 14:48:39.731] [INFO ] SignaturePanel destroyed
+[2026-04-28 14:48:39.731] [INFO ] CameraPanel destroyed
+[2026-04-28 14:48:39.731] [INFO ] TextureRenderer: Shutdown complete
+[2026-04-28 14:48:39.732] [INFO ] Successfully closed camera
+[2026-04-28 14:48:39.732] [INFO ] Successfully unloaded plugin: DirectShowPlugin
+[2026-04-28 14:48:39.732] [INFO ] CameraManager shutdown completed
+[2026-04-28 14:48:39.732] [INFO ] IDCardPanel destroyed
+[2026-04-28 14:48:39.735] [INFO ] ImGui shutdown complete
+[2026-04-28 14:48:39.777] [INFO ] GLFW shutdown complete
+[2026-04-28 14:48:39.778] [INFO ] GUI shutdown complete
+[2026-04-28 14:48:39.778] [INFO ] Application shutdown complete
+[2026-04-28 14:49:02.756] [INFO ] === AsTestTool Starting ===
+[2026-04-28 14:49:02.758] [INFO ] Version: 1.0.0
+[2026-04-28 14:49:02.758] [INFO ] Platform: Windows
+[2026-04-28 14:49:02.758] [INFO ] Application constructor called
+[2026-04-28 14:49:02.758] [INFO ] Initializing application
+[2026-04-28 14:49:02.759] [INFO ] Setting default configuration
+[2026-04-28 14:49:02.759] [INFO ] Initializing devices via DeviceManager
+[2026-04-28 14:49:02.759] [INFO ] DeviceManager: Initializing all devices
+[2026-04-28 14:49:02.759] [INFO ] Creating ID card reader, type: default
+[2026-04-28 14:49:02.759] [INFO ] LibraryLoader created
+[2026-04-28 14:49:02.759] [INFO ] WindowsIDCardReader created, type: default
+[2026-04-28 14:49:02.759] [INFO ] Initializing Windows ID card reader
+[2026-04-28 14:49:02.759] [INFO ] Trying to load system library: CMCC_IDCARD.DLL
+[2026-04-28 14:49:02.759] [INFO ] Loading ID card reader library: CMCC_IDCARD.DLL
+[2026-04-28 14:49:02.759] [INFO ] Loading library: CMCC_IDCARD.DLL
+[2026-04-28 14:49:02.760] [INFO ] Library loaded successfully: CMCC_IDCARD.DLL
+[2026-04-28 14:49:02.760] [INFO ] Library loaded successfully: CMCC_IDCARD.DLL
+[2026-04-28 14:49:02.760] [INFO ] Successfully loaded ID card reader library from system: CMCC_IDCARD.DLL
+[2026-04-28 14:49:02.760] [INFO ] Windows ID card reader initialized successfully
+[2026-04-28 14:49:02.760] [INFO ] DeviceManager: ID card reader initialized successfully
+[2026-04-28 14:49:02.760] [INFO ] Creating camera
+[2026-04-28 14:49:02.760] [INFO ] WindowsCamera created
+[2026-04-28 14:49:02.760] [INFO ] Initializing Windows camera
+[2026-04-28 14:49:02.760] [INFO ] DeviceManager: Camera initialized successfully
+[2026-04-28 14:49:02.761] [INFO ] Creating signature pad, type: default
+[2026-04-28 14:49:02.761] [INFO ] WindowsSignaturePad created, type: default
+[2026-04-28 14:49:02.761] [INFO ] LibraryLoader created
+[2026-04-28 14:49:02.761] [INFO ] Initializing Windows signature pad
+[2026-04-28 14:49:02.761] [INFO ] Trying to load system library: CMCC_SIGN.DLL
+[2026-04-28 14:49:02.761] [INFO ] Loading signature pad library: CMCC_SIGN.DLL
+[2026-04-28 14:49:02.761] [INFO ] Loading library: CMCC_SIGN.DLL
+[2026-04-28 14:49:02.763] [ERROR] Failed to load library: CMCC_SIGN.DLL, error code: 126
+[2026-04-28 14:49:02.765] [ERROR] Error details: 找不到指定的模块。
+
+[2026-04-28 14:49:02.766] [ERROR] Failed to load library: CMCC_SIGN.DLL
+[2026-04-28 14:49:02.766] [WARN ] Failed to load system library: CMCC_SIGN.DLL
+[2026-04-28 14:49:02.766] [WARN ] Failed to load signature pad library from any default location
+[2026-04-28 14:49:02.766] [INFO ] You can use 'Load Library' button to select a custom DLL
+[2026-04-28 14:49:02.766] [INFO ] DeviceManager: Signature pad initialized successfully
+[2026-04-28 14:49:02.766] [INFO ] DeviceManager: All devices initialized successfully
+[2026-04-28 14:49:02.766] [INFO ] Devices initialized successfully
+[2026-04-28 14:49:02.766] [INFO ] Initializing GUI
+[2026-04-28 14:49:02.767] [INFO ] Initializing GLFW
+[2026-04-28 14:49:03.018] [INFO ] GLFW initialized successfully
+[2026-04-28 14:49:03.018] [INFO ] Initializing OpenGL
+[2026-04-28 14:49:03.018] [INFO ] OpenGL initialized successfully
+[2026-04-28 14:49:03.018] [INFO ] Initializing ImGui
+[2026-04-28 14:49:03.019] [INFO ] Setting up Chinese fonts
+[2026-04-28 14:49:03.019] [INFO ] Loading Chinese font: C:/Windows/Fonts/msyh.ttc
+[2026-04-28 14:49:03.026] [INFO ] Chinese font loaded successfully: C:/Windows/Fonts/msyh.ttc
+[2026-04-28 14:49:03.026] [INFO ] Font atlas built successfully
+[2026-04-28 14:49:03.026] [INFO ] Font setup completed
+[2026-04-28 14:49:03.026] [INFO ] ImGui initialized successfully
+[2026-04-28 14:49:03.026] [INFO ] MainWindow created
+[2026-04-28 14:49:03.026] [INFO ] Initializing MainWindow
+[2026-04-28 14:49:03.026] [INFO ] Initializing panels
+[2026-04-28 14:49:03.026] [INFO ] Detected platform: Windows
+[2026-04-28 14:49:03.026] [INFO ] Loading plugin: DirectShowPlugin from H:\work\Demo\Demo072\AsTestTool\build\Debug/plugins/windows/DirectShowPlugin.dll
+[2026-04-28 14:49:03.027] [INFO ] Successfully loaded plugin: DirectShowPlugin from H:\work\Demo\Demo072\AsTestTool\build\Debug/plugins/windows/DirectShowPlugin.dll
+[2026-04-28 14:49:03.127] [INFO ] Successfully loaded and initialized plugin: DirectShowPlugin
+[2026-04-28 14:49:03.127] [INFO ] CameraManager initialized successfully
+[2026-04-28 14:49:03.127] [INFO ] Camera manager created and initialized successfully
+[2026-04-28 14:49:03.127] [INFO ] IDCardPanel created
+[2026-04-28 14:49:03.127] [INFO ] CameraPanel created
+[2026-04-28 14:49:03.127] [INFO ] TextureRenderer: Initialized successfully
+[2026-04-28 14:49:03.127] [INFO ] SignaturePanel created
+[2026-04-28 14:49:03.127] [INFO ] Setting camera manager...
+[2026-04-28 14:49:03.128] [INFO ] Camera manager set successfully
+[2026-04-28 14:49:03.128] [INFO ] Found 1 available cameras
+[2026-04-28 14:49:03.128] [INFO ] Refreshing device list...
+[2026-04-28 14:49:03.128] [INFO ] Device list refreshed, found 1 devices
+[2026-04-28 14:49:03.128] [INFO ] Device 0: Logi C270 HD WebCam (DirectShow:camera_0)
+[2026-04-28 14:49:03.128] [INFO ] Panels initialized successfully
+[2026-04-28 14:49:03.128] [INFO ] Applying light theme
+[2026-04-28 14:49:03.128] [INFO ] GUI initialized successfully
+[2026-04-28 14:49:03.128] [INFO ] Application initialized successfully
+[2026-04-28 14:49:03.128] [INFO ] Starting application main loop
+[2026-04-28 14:49:03.128] [INFO ] Entering main loop
+[2026-04-28 14:51:29.551] [INFO ] === AsTestTool Starting ===
+[2026-04-28 14:51:29.552] [INFO ] Version: 1.0.0
+[2026-04-28 14:51:29.552] [INFO ] Platform: Windows
+[2026-04-28 14:51:29.552] [INFO ] Application constructor called
+[2026-04-28 14:51:29.552] [INFO ] Initializing application
+[2026-04-28 14:51:29.552] [INFO ] Setting default configuration
+[2026-04-28 14:51:29.552] [INFO ] Initializing devices via DeviceManager
+[2026-04-28 14:51:29.552] [INFO ] DeviceManager: Initializing all devices
+[2026-04-28 14:51:29.552] [INFO ] Creating ID card reader, type: default
+[2026-04-28 14:51:29.552] [INFO ] LibraryLoader created
+[2026-04-28 14:51:29.552] [INFO ] WindowsIDCardReader created, type: default
+[2026-04-28 14:51:29.552] [INFO ] Initializing Windows ID card reader
+[2026-04-28 14:51:29.552] [INFO ] Trying to load system library: CMCC_IDCARD.DLL
+[2026-04-28 14:51:29.553] [INFO ] Loading ID card reader library: CMCC_IDCARD.DLL
+[2026-04-28 14:51:29.553] [INFO ] Loading library: CMCC_IDCARD.DLL
+[2026-04-28 14:51:29.555] [INFO ] Library loaded successfully: CMCC_IDCARD.DLL
+[2026-04-28 14:51:29.555] [INFO ] Library loaded successfully: CMCC_IDCARD.DLL
+[2026-04-28 14:51:29.555] [INFO ] Successfully loaded ID card reader library from system: CMCC_IDCARD.DLL
+[2026-04-28 14:51:29.555] [INFO ] Windows ID card reader initialized successfully
+[2026-04-28 14:51:29.555] [INFO ] DeviceManager: ID card reader initialized successfully
+[2026-04-28 14:51:29.555] [INFO ] Creating camera
+[2026-04-28 14:51:29.555] [INFO ] WindowsCamera created
+[2026-04-28 14:51:29.555] [INFO ] Initializing Windows camera
+[2026-04-28 14:51:29.555] [INFO ] DeviceManager: Camera initialized successfully
+[2026-04-28 14:51:29.555] [INFO ] Creating signature pad, type: default
+[2026-04-28 14:51:29.556] [INFO ] WindowsSignaturePad created, type: default
+[2026-04-28 14:51:29.556] [INFO ] LibraryLoader created
+[2026-04-28 14:51:29.556] [INFO ] Initializing Windows signature pad
+[2026-04-28 14:51:29.556] [INFO ] Trying to load system library: CMCC_SIGN.DLL
+[2026-04-28 14:51:29.556] [INFO ] Loading signature pad library: CMCC_SIGN.DLL
+[2026-04-28 14:51:29.556] [INFO ] Loading library: CMCC_SIGN.DLL
+[2026-04-28 14:51:29.556] [ERROR] Failed to load library: CMCC_SIGN.DLL, error code: 126
+[2026-04-28 14:51:29.559] [ERROR] Error details: 找不到指定的模块。
+
+[2026-04-28 14:51:29.560] [ERROR] Failed to load library: CMCC_SIGN.DLL
+[2026-04-28 14:51:29.560] [WARN ] Failed to load system library: CMCC_SIGN.DLL
+[2026-04-28 14:51:29.561] [WARN ] Failed to load signature pad library from any default location
+[2026-04-28 14:51:29.561] [INFO ] You can use 'Load Library' button to select a custom DLL
+[2026-04-28 14:51:29.561] [INFO ] DeviceManager: Signature pad initialized successfully
+[2026-04-28 14:51:29.561] [INFO ] DeviceManager: All devices initialized successfully
+[2026-04-28 14:51:29.561] [INFO ] Devices initialized successfully
+[2026-04-28 14:51:29.561] [INFO ] Initializing GUI
+[2026-04-28 14:51:29.561] [INFO ] Initializing GLFW
+[2026-04-28 14:51:29.797] [INFO ] GLFW initialized successfully
+[2026-04-28 14:51:29.797] [INFO ] Initializing OpenGL
+[2026-04-28 14:51:29.798] [INFO ] OpenGL initialized successfully
+[2026-04-28 14:51:29.798] [INFO ] Initializing ImGui
+[2026-04-28 14:51:29.798] [INFO ] Setting up Chinese fonts
+[2026-04-28 14:51:29.798] [INFO ] Loading Chinese font: C:/Windows/Fonts/msyh.ttc
+[2026-04-28 14:51:29.803] [INFO ] Chinese font loaded successfully: C:/Windows/Fonts/msyh.ttc
+[2026-04-28 14:51:29.803] [INFO ] Font atlas built successfully
+[2026-04-28 14:51:29.803] [INFO ] Font setup completed
+[2026-04-28 14:51:29.803] [INFO ] ImGui initialized successfully
+[2026-04-28 14:51:29.803] [INFO ] MainWindow created
+[2026-04-28 14:51:29.803] [INFO ] Initializing MainWindow
+[2026-04-28 14:51:29.803] [INFO ] Initializing panels
+[2026-04-28 14:51:29.803] [INFO ] Detected platform: Windows
+[2026-04-28 14:51:29.803] [INFO ] Loading plugin: DirectShowPlugin from H:\work\Demo\Demo072\AsTestTool\build\Debug/plugins/windows/DirectShowPlugin.dll
+[2026-04-28 14:51:29.804] [INFO ] Successfully loaded plugin: DirectShowPlugin from H:\work\Demo\Demo072\AsTestTool\build\Debug/plugins/windows/DirectShowPlugin.dll
+[2026-04-28 14:51:29.898] [INFO ] Successfully loaded and initialized plugin: DirectShowPlugin
+[2026-04-28 14:51:29.898] [INFO ] CameraManager initialized successfully
+[2026-04-28 14:51:29.898] [INFO ] Camera manager created and initialized successfully
+[2026-04-28 14:51:29.898] [INFO ] IDCardPanel created
+[2026-04-28 14:51:29.898] [INFO ] CameraPanel created
+[2026-04-28 14:51:29.898] [INFO ] TextureRenderer: Initialized successfully
+[2026-04-28 14:51:29.898] [INFO ] SignaturePanel created
+[2026-04-28 14:51:29.898] [INFO ] Setting camera manager...
+[2026-04-28 14:51:29.898] [INFO ] Camera manager set successfully
+[2026-04-28 14:51:29.898] [INFO ] Found 1 available cameras
+[2026-04-28 14:51:29.898] [INFO ] Refreshing device list...
+[2026-04-28 14:51:29.898] [INFO ] Device list refreshed, found 1 devices
+[2026-04-28 14:51:29.898] [INFO ] Device 0: Logi C270 HD WebCam (DirectShow:camera_0)
+[2026-04-28 14:51:29.898] [INFO ] Panels initialized successfully
+[2026-04-28 14:51:29.898] [INFO ] Applying light theme
+[2026-04-28 14:51:29.899] [INFO ] GUI initialized successfully
+[2026-04-28 14:51:29.899] [INFO ] Application initialized successfully
+[2026-04-28 14:51:29.899] [INFO ] Starting application main loop
+[2026-04-28 14:51:29.899] [INFO ] Entering main loop
+[2026-04-28 14:51:32.598] [INFO ] Capture button clicked
+[2026-04-28 14:51:32.598] [WARN ] Camera not connected, cannot capture image

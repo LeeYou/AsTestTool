@@ -110,6 +110,7 @@ private:
     // 像素格式转换
     GUID PixelFormatToGUID(PixelFormat format) const;
     PixelFormat GUIDToPixelFormat(const GUID& guid) const;
+    std::string GetFormatName(const GUID& guid) const;
     
     // 真实图像获取
     bool TryGetRealCameraImage(std::vector<uint8_t>& imageData, int width, int height);

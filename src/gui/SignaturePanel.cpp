@@ -175,7 +175,7 @@ void SignaturePanel::RenderControls() {
     }
     
     ImGui::SameLine();
-    if (ImGui::Button("加载库", ImVec2(100, 30))) {
+    if (ImGui::Button("重新加载库", ImVec2(100, 30))) {
         LoadSignatureLibrary();
     }
     
@@ -183,42 +183,60 @@ void SignaturePanel::RenderControls() {
 }
 
 void SignaturePanel::RenderLibrarySettings() {
-    ImGui::Separator();
-    ImGui::Text("库设置:");
-    
-    char pathBuffer[512];
-    strncpy_s(pathBuffer, m_libraryPath.c_str(), sizeof(pathBuffer) - 1);
-    pathBuffer[sizeof(pathBuffer) - 1] = '\0';
-    
-    if (ImGui::InputText("DLL路径", pathBuffer, sizeof(pathBuffer))) {
-        m_libraryPath = std::string(pathBuffer);
-    }
-    
-    ImGui::SameLine();
-    if (ImGui::Button("浏览...", ImVec2(80, 20))) {
-        // 使用跨平台文件对话框
-        auto fileDialog = FileDialog::Create();
-        if (fileDialog) {
-            std::vector<FileDialogFilter> filters = {
-                {"动态链接库 (*.dll)", "*.dll"},
-                {"所有文件 (*.*)", "*.*"}
-            };
-            auto result = fileDialog->OpenFile("选择手写屏DLL文件", filters);
-            if (result.success) {
-                m_libraryPath = result.filePath;
-                LOG_INFO("Selected DLL file: " + m_libraryPath);
+    if (ImGui::Begin("手写屏库设置", &m_showLibrarySettings)) {
+        ImGui::Text("库文件路径:");
+        ImGui::SameLine();
+        
+        char pathBuffer[512];
+        strncpy_s(pathBuffer, m_libraryPath.c_str(), sizeof(pathBuffer) - 1);
+        pathBuffer[sizeof(pathBuffer) - 1] = '\0';
+        
+        if (ImGui::InputText("##LibraryPath", pathBuffer, sizeof(pathBuffer))) {
+            m_libraryPath = std::string(pathBuffer);
+        }
+        
+        ImGui::SameLine();
+        if (ImGui::Button("浏览...", ImVec2(80, 20))) {
+            auto fileDialog = FileDialog::Create();
+            if (fileDialog) {
+                std::vector<FileDialogFilter> filters = {
+                    {"动态链接库 (*.dll)", "*.dll"},
+                    {"所有文件 (*.*)", "*.*"}
+                };
+                auto result = fileDialog->OpenFile("选择手写屏DLL文件", filters);
+                if (result.success) {
+                    m_libraryPath = result.filePath;
+                    LOG_INFO("Selected DLL file: " + m_libraryPath);
+                }
             }
         }
+        
+        ImGui::Separator();
+        
+        ImGui::Text("默认加载:");
+        ImGui::BulletText("系统DLL: CMCC_SIGN.DLL");
+        ImGui::BulletText("系统会自动在系统目录中查找");
+        ImGui::BulletText("包括: System32, SysWOW64, PATH环境变量等");
+        
+        ImGui::Separator();
+        
+        if (ImGui::Button("应用设置", ImVec2(100, 30))) {
+            LoadSignatureLibrary();
+        }
+        
+        ImGui::SameLine();
+        
+        if (ImGui::Button("关闭", ImVec2(100, 30))) {
+            m_showLibrarySettings = false;
+        }
+        
+        ImGui::Separator();
+        ImGui::Text("说明:");
+        ImGui::Text("- 库文件路径: 手写屏DLL文件路径");
+        ImGui::Text("- 支持的库: cmcc_sign.dll 等标准接口库");
+        ImGui::Text("- 修改后可点击 [应用设置] 重新记录配置");
     }
-    
-    ImGui::Text("当前库: %s", m_libraryPath.c_str());
-    
-    // 显示默认路径信息
-    ImGui::Separator();
-    ImGui::Text("默认加载:");
-    ImGui::BulletText("系统DLL: CMCC_SIGN.DLL");
-    ImGui::BulletText("系统会自动在系统目录中查找");
-    ImGui::BulletText("包括: System32, SysWOW64, PATH环境变量等");
+    ImGui::End();
 }
 
 // 设备控制方法实现

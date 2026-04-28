@@ -266,24 +266,24 @@ void CameraPanel::RenderDeviceControls() {
         float buttonHeight = 30.0f;
         
         // 第一行按钮
-        if (ImGui::Button("📷 拍照", ImVec2(buttonWidth, buttonHeight))) {
+        if (ImGui::Button("拍照", ImVec2(buttonWidth, buttonHeight))) {
             LOG_INFO("Capture button clicked");
             CaptureImage();
         }
         
-        if (ImGui::Button("🎥 录像", ImVec2(buttonWidth, buttonHeight))) {
+        if (ImGui::Button("录像", ImVec2(buttonWidth, buttonHeight))) {
             LOG_INFO("Record button clicked");
             ToggleRecording();
         }
         
         // 预览控制按钮
         if (m_previewActive) {
-            if (ImGui::Button("⏹ 停止预览", ImVec2(buttonWidth, buttonHeight))) {
+            if (ImGui::Button("停止预览", ImVec2(buttonWidth, buttonHeight))) {
                 LOG_INFO("Stop preview button clicked");
                 StopPreview();
             }
         } else {
-            if (ImGui::Button("▶ 开始预览", ImVec2(buttonWidth, buttonHeight))) {
+            if (ImGui::Button("开始预览", ImVec2(buttonWidth, buttonHeight))) {
                 LOG_INFO("Start preview button clicked");
                 StartPreview();
             }
@@ -302,14 +302,14 @@ void CameraPanel::RenderDeviceControls() {
         float buttonHeight = useCompactButtons ? 30.0f : 35.0f;
         
         // 拍照按钮
-        if (ImGui::Button("📷 拍照", ImVec2(buttonWidth, buttonHeight))) {
+        if (ImGui::Button("拍照", ImVec2(buttonWidth, buttonHeight))) {
             LOG_INFO("Capture button clicked");
             CaptureImage();
         }
         ImGui::SameLine();
         
         // 录像按钮
-        if (ImGui::Button("🎥 录像", ImVec2(buttonWidth, buttonHeight))) {
+        if (ImGui::Button("录像", ImVec2(buttonWidth, buttonHeight))) {
             LOG_INFO("Record button clicked");
             ToggleRecording();
         }
@@ -317,12 +317,12 @@ void CameraPanel::RenderDeviceControls() {
         
         // 预览控制按钮
         if (m_previewActive) {
-            if (ImGui::Button("⏹ 停止预览", ImVec2(buttonWidth + 10, buttonHeight))) {
+            if (ImGui::Button("停止预览", ImVec2(buttonWidth + 10, buttonHeight))) {
                 LOG_INFO("Stop preview button clicked");
                 StopPreview();
             }
         } else {
-            if (ImGui::Button("▶ 开始预览", ImVec2(buttonWidth + 10, buttonHeight))) {
+            if (ImGui::Button("开始预览", ImVec2(buttonWidth + 10, buttonHeight))) {
                 LOG_INFO("Start preview button clicked");
                 StartPreview();
             }
@@ -356,7 +356,7 @@ static void RenderPreviewPlaceholder(const ImVec2& startPos, const ImVec2& size,
     
     // 摄像头图标
     ImVec2 iconPos = ImVec2(center.x - 30, center.y - 50);
-    drawList->AddText(iconPos, IM_COL32(80, 80, 80, 255), "📷");
+    drawList->AddText(iconPos, IM_COL32(80, 80, 80, 255), "CAM");
     
     // 主文本
     ImVec2 textPos = ImVec2(center.x - (mainText ? strlen(mainText) * 3.5f : 50), center.y + 5);
@@ -367,6 +367,27 @@ static void RenderPreviewPlaceholder(const ImVec2& startPos, const ImVec2& size,
     if (hintText) {
         ImVec2 hintPos = ImVec2(center.x - strlen(hintText) * 3.5f, center.y + 25);
         drawList->AddText(hintPos, IM_COL32(120, 120, 120, 255), hintText);
+    }
+}
+
+static bool UploadPreviewFrame(TextureRenderer* textureRenderer,
+                                const std::vector<uint8_t>& imageData,
+                                int width,
+                                int height,
+                                Plugins::PixelFormat format) {
+    if (!textureRenderer || imageData.empty()) {
+        return false;
+    }
+
+    switch (format) {
+        case Plugins::PixelFormat::RGB24:
+            return textureRenderer->UploadRGB(imageData.data(), width, height);
+        case Plugins::PixelFormat::BGR24:
+            return textureRenderer->UploadBGR(imageData.data(), width, height);
+        case Plugins::PixelFormat::RGB32:
+            return textureRenderer->UploadRGBA(imageData.data(), width, height);
+        default:
+            return false;
     }
 }
 
@@ -395,13 +416,10 @@ void CameraPanel::RenderPreviewArea() {
             if (m_cameraManager->CaptureImage(m_imageData, format, width, height)) {
                 m_imageWidth = width;
                 m_imageHeight = height;
-                m_hasImageData = true;
                 m_currentFormat = GetPixelFormatString(format);
                 
                 // 使用纹理渲染器上传图像数据（优化性能的关键）
-                if (m_textureRenderer && !m_imageData.empty()) {
-                    m_textureRenderer->UploadBGR(m_imageData.data(), width, height);
-                }
+                m_hasImageData = UploadPreviewFrame(m_textureRenderer.get(), m_imageData, width, height, format);
             }
         }
         
@@ -438,11 +456,11 @@ void CameraPanel::RenderControlPanel() {
     
     // 大号拍照按钮（类似真实相机）
     ImVec2 buttonSize = ImVec2(80, 80);
-    if (ImGui::Button("📷", buttonSize)) {
+    if (ImGui::Button("拍照", buttonSize)) {
         CaptureImage();
     }
     ImGui::SameLine();
-    if (ImGui::Button("🎥", buttonSize)) {
+    if (ImGui::Button("录像", buttonSize)) {
         ToggleRecording();
     }
     
@@ -879,6 +897,8 @@ std::string CameraPanel::GetPixelFormatString(Plugins::PixelFormat format) const
             return "YUV422";
         case Plugins::PixelFormat::RGB24:
             return "RGB24";
+        case Plugins::PixelFormat::BGR24:
+            return "BGR24";
         case Plugins::PixelFormat::RGB32:
             return "RGB32";
         case Plugins::PixelFormat::MJPG:

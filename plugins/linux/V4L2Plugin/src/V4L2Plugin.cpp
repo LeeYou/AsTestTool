@@ -56,12 +56,12 @@ bool V4L2Camera::Initialize() {
     }
     
     try {
-        // åˆå§‹åŒ–V4L2
+        // ³õÊ¼»¯V4L2
         if (!InitializeV4L2()) {
             return false;
         }
         
-        // æšä¸¾å¯ç”¨æ‘„åƒå¤´
+        // Ã¶¾Ù¿ÉÓÃÉãÏñÍ·
         if (!EnumerateCameras()) {
             SetLastError("Failed to enumerate cameras", -1);
             return false;
@@ -78,23 +78,23 @@ bool V4L2Camera::Initialize() {
 
 void V4L2Camera::Shutdown() {
     try {
-        // åœæ­¢é¢„è§ˆ
+        // Í£Ö¹Ô¤ÀÀ
         if (m_previewActive) {
             StopPreview();
         }
         
-        // å…³é—­æ‘„åƒå¤´
+        // ¹Ø±ÕÉãÏñÍ·
         if (m_cameraOpen) {
             CloseCamera();
         }
         
-        // æ¸…ç†V4L2
+        // ÇåÀíV4L2
         CleanupV4L2();
         
         m_initialized = false;
         
     } catch (const std::exception& e) {
-        // è®°å½•é”™è¯¯ä½†ä¸æŠ›å‡ºå¼‚å¸¸
+        // ¼ÇÂ¼´íÎóµ«²»Å×³öÒì³£
         std::cerr << "Exception during shutdown: " << e.what() << std::endl;
     }
 }
@@ -126,7 +126,7 @@ bool V4L2Camera::OpenCamera(const std::string& cameraId) {
     }
     
     try {
-        // æŸ¥æ‰¾æŒ‡å®šçš„æ‘„åƒå¤´
+        // ²éÕÒÖ¸¶¨µÄÉãÏñÍ·
         CameraInfo* targetCamera = nullptr;
         for (auto& camera : m_availableCameras) {
             if (camera.id == cameraId) {
@@ -140,24 +140,24 @@ bool V4L2Camera::OpenCamera(const std::string& cameraId) {
             return false;
         }
         
-        // æ‰“å¼€è®¾å¤‡
+        // ´ò¿ªÉè±¸
         if (!OpenDevice(targetCamera->devicePath)) {
             return false;
         }
         
-        // è®¾ç½®è®¾å¤‡
+        // ÉèÖÃÉè±¸
         if (!SetupDevice()) {
             CloseDevice();
             return false;
         }
         
-        // è‡ªåŠ¨æ£€æµ‹æœ€ä½³æ”¯æŒçš„æ ¼å¼
+        // ×Ô¶¯¼ì²â×î¼ÑÖ§³ÖµÄ¸ñÊ½
         if (!AutoDetectBestFormat()) {
-            // å¦‚æœè‡ªåŠ¨æ£€æµ‹å¤±è´¥ï¼Œä½¿ç”¨é»˜è®¤æ ¼å¼
+            // Èç¹û×Ô¶¯¼ì²âÊ§°Ü£¬Ê¹ÓÃÄ¬ÈÏ¸ñÊ½
             m_currentFormat = PixelFormat::YUV420;
         }
         
-        // åˆ†é…ç¼“å†²åŒº
+        // ·ÖÅä»º³åÇø
         if (!AllocateBuffers()) {
             CloseDevice();
             return false;
@@ -179,15 +179,15 @@ bool V4L2Camera::CloseCamera() {
     }
     
     try {
-        // åœæ­¢æµ
+        // Í£Ö¹Á÷
         if (m_previewActive) {
             StopStreaming();
         }
         
-        // é‡Šæ”¾ç¼“å†²åŒº
+        // ÊÍ·Å»º³åÇø
         FreeBuffers();
         
-        // å…³é—­è®¾å¤‡
+        // ¹Ø±ÕÉè±¸
         CloseDevice();
         
         m_cameraOpen = false;
@@ -262,16 +262,16 @@ bool V4L2Camera::CaptureImage(std::vector<uint8_t>& imageData,
     }
     
     try {
-        // è®¾ç½®è¿”å›å‚æ•°
+        // ÉèÖÃ·µ»Ø²ÎÊı
         format = m_currentFormat;
         width = m_currentWidth;
         height = m_currentHeight;
         
-        // åˆ†é…å›¾åƒæ•°æ®ç¼“å†²åŒº
-        size_t dataSize = width * height * 3; // RGB24æ ¼å¼
+        // ·ÖÅäÍ¼ÏñÊı¾İ»º³åÇø
+        size_t dataSize = width * height * 3; // RGB24¸ñÊ½
         imageData.resize(dataSize);
         
-        // ä¼˜å…ˆä½¿ç”¨å†…å­˜æ˜ å°„ç¼“å†²åŒºè·å–æ•°æ®
+        // ÓÅÏÈÊ¹ÓÃÄÚ´æÓ³Éä»º³åÇø»ñÈ¡Êı¾İ
         std::lock_guard<std::mutex> lock(m_frameMutex);
         if (m_frameAvailable && m_latestFrameIndex >= 0 && 
             m_latestFrameIndex < m_buffers.size() && 
@@ -281,21 +281,21 @@ bool V4L2Camera::CaptureImage(std::vector<uint8_t>& imageData,
             std::cout << "Expected size for YUV422: " << (width * height * 2) << std::endl;
             std::cout << "Expected size for RGB24: " << (width * height * 3) << std::endl;
             
-            // æ ¹æ®å®é™…æ•°æ®å¤§å°åˆ¤æ–­æ ¼å¼
+            // ¸ù¾İÊµ¼ÊÊı¾İ´óĞ¡ÅĞ¶Ï¸ñÊ½
             PixelFormat actualFormat = m_currentFormat;
             if (m_latestFrameSize == width * height * 3) {
-                // æ•°æ®å¤§å°åŒ¹é…RGB24
+                // Êı¾İ´óĞ¡Æ¥ÅäRGB24
                 actualFormat = PixelFormat::RGB24;
                 std::cout << "Detected RGB24 format based on data size" << std::endl;
             } else if (m_latestFrameSize == width * height * 2) {
-                // æ•°æ®å¤§å°åŒ¹é…YUV422
+                // Êı¾İ´óĞ¡Æ¥ÅäYUV422
                 actualFormat = PixelFormat::YUV422;
                 std::cout << "Detected YUV422 format based on data size" << std::endl;
             } else {
                 std::cout << "Unknown format, using configured format: " << static_cast<int>(m_currentFormat) << std::endl;
             }
             
-            // è¾“å‡ºåŸå§‹æ•°æ®çš„å‰å‡ ä¸ªå­—èŠ‚
+            // Êä³öÔ­Ê¼Êı¾İµÄÇ°¼¸¸ö×Ö½Ú
             std::cout << "Raw data first 16 bytes: ";
             uint8_t* rawData = static_cast<uint8_t*>(m_buffers[m_latestFrameIndex].start);
             for (int i = 0; i < std::min(16, (int)m_latestFrameSize); i++) {
@@ -303,13 +303,15 @@ bool V4L2Camera::CaptureImage(std::vector<uint8_t>& imageData,
             }
             std::cout << std::endl;
             
-            // ä½¿ç”¨æ£€æµ‹åˆ°çš„æ ¼å¼è¿›è¡Œè½¬æ¢
+            // Ê¹ÓÃ¼ì²âµ½µÄ¸ñÊ½½øĞĞ×ª»»
             ConvertToRGB(rawData, imageData.data(), width, height, actualFormat);
         } else {
             std::cout << "No buffer data available, generating test pattern" << std::endl;
-            // å¦‚æœéƒ½æ²¡æœ‰æ•°æ®ï¼Œç”Ÿæˆæµ‹è¯•å›¾æ¡ˆ
+            // Èç¹û¶¼Ã»ÓĞÊı¾İ£¬Éú³É²âÊÔÍ¼°¸
             GenerateTestPattern(imageData.data(), width, height);
         }
+
+        format = PixelFormat::RGB24;
         
         return true;
         
@@ -328,30 +330,30 @@ bool V4L2Camera::SetResolution(int width, int height, int fps) {
     }
     
     try {
-        // åœæ­¢å½“å‰æµ
+        // Í£Ö¹µ±Ç°Á÷
         if (m_previewActive) {
             StopStreaming();
         }
         
-        // é‡Šæ”¾å½“å‰ç¼“å†²åŒº
+        // ÊÍ·Åµ±Ç°»º³åÇø
         FreeBuffers();
         
-        // è®¾ç½®æ–°çš„åˆ†è¾¨ç‡
+        // ÉèÖÃĞÂµÄ·Ö±æÂÊ
         m_currentWidth = width;
         m_currentHeight = height;
         m_currentFps = fps;
         
-        // é‡æ–°è®¾ç½®è®¾å¤‡
+        // ÖØĞÂÉèÖÃÉè±¸
         if (!SetupDevice()) {
             return false;
         }
         
-        // é‡æ–°åˆ†é…ç¼“å†²åŒº
+        // ÖØĞÂ·ÖÅä»º³åÇø
         if (!AllocateBuffers()) {
             return false;
         }
         
-        // å¦‚æœä¹‹å‰æœ‰é¢„è§ˆï¼Œé‡æ–°å¼€å§‹
+        // Èç¹ûÖ®Ç°ÓĞÔ¤ÀÀ£¬ÖØĞÂ¿ªÊ¼
         if (m_previewActive) {
             if (!StartStreaming()) {
                 return false;
@@ -373,28 +375,28 @@ bool V4L2Camera::SetPixelFormat(PixelFormat format) {
     }
     
     try {
-        // åœæ­¢å½“å‰æµ
+        // Í£Ö¹µ±Ç°Á÷
         if (m_previewActive) {
             StopStreaming();
         }
         
-        // é‡Šæ”¾å½“å‰ç¼“å†²åŒº
+        // ÊÍ·Åµ±Ç°»º³åÇø
         FreeBuffers();
         
-        // è®¾ç½®æ–°çš„åƒç´ æ ¼å¼
+        // ÉèÖÃĞÂµÄÏñËØ¸ñÊ½
         m_currentFormat = format;
         
-        // é‡æ–°è®¾ç½®è®¾å¤‡
+        // ÖØĞÂÉèÖÃÉè±¸
         if (!SetupDevice()) {
             return false;
         }
         
-        // é‡æ–°åˆ†é…ç¼“å†²åŒº
+        // ÖØĞÂ·ÖÅä»º³åÇø
         if (!AllocateBuffers()) {
             return false;
         }
         
-        // å¦‚æœä¹‹å‰æœ‰é¢„è§ˆï¼Œé‡æ–°å¼€å§‹
+        // Èç¹ûÖ®Ç°ÓĞÔ¤ÀÀ£¬ÖØĞÂ¿ªÊ¼
         if (m_previewActive) {
             if (!StartStreaming()) {
                 return false;
@@ -490,26 +492,26 @@ int V4L2Camera::GetLastErrorCode() const {
 }
 
 bool V4L2Camera::InitializeV4L2() {
-    // V4L2åˆå§‹åŒ–é€šå¸¸ä¸éœ€è¦ç‰¹æ®Šæ“ä½œ
+    // V4L2³õÊ¼»¯Í¨³£²»ĞèÒªÌØÊâ²Ù×÷
     return true;
 }
 
 void V4L2Camera::CleanupV4L2() {
-    // V4L2æ¸…ç†é€šå¸¸ä¸éœ€è¦ç‰¹æ®Šæ“ä½œ
+    // V4L2ÇåÀíÍ¨³£²»ĞèÒªÌØÊâ²Ù×÷
 }
 
 bool V4L2Camera::EnumerateCameras() {
     try {
         m_availableCameras.clear();
         
-        // æ‰«æ/dev/video*è®¾å¤‡
+        // É¨Ãè/dev/video*Éè±¸
         for (int i = 0; i < 10; ++i) {
             std::string devicePath = "/dev/video" + std::to_string(i);
             
-            // å°è¯•æ‰“å¼€è®¾å¤‡
+            // ³¢ÊÔ´ò¿ªÉè±¸
             int fd = open(devicePath.c_str(), O_RDWR);
             if (fd >= 0) {
-                // æ£€æŸ¥è®¾å¤‡èƒ½åŠ›
+                // ¼ì²éÉè±¸ÄÜÁ¦
                 if (CheckDeviceCapabilities(fd)) {
                     CameraInfo camera;
                     camera.id = "camera_" + std::to_string(i);
@@ -517,16 +519,16 @@ bool V4L2Camera::EnumerateCameras() {
                     camera.devicePath = devicePath;
                     camera.isAvailable = true;
                     
-                    // è·å–æ”¯æŒçš„åƒç´ æ ¼å¼
+                    // »ñÈ¡Ö§³ÖµÄÏñËØ¸ñÊ½
                     camera.supportedFormats = GetSupportedPixelFormats(fd);
                     
-                    // è·å–æ”¯æŒçš„åˆ†è¾¨ç‡ï¼ˆä½¿ç”¨ç¬¬ä¸€ä¸ªæ”¯æŒçš„æ ¼å¼ï¼‰
+                    // »ñÈ¡Ö§³ÖµÄ·Ö±æÂÊ£¨Ê¹ÓÃµÚÒ»¸öÖ§³ÖµÄ¸ñÊ½£©
                     if (!camera.supportedFormats.empty()) {
                         camera.supportedResolutions = GetSupportedResolutions(fd, 
                             PixelFormatToV4L2(camera.supportedFormats[0]));
                     }
                     
-                    // å¦‚æœæ²¡æœ‰è·å–åˆ°åˆ†è¾¨ç‡ï¼Œæ·»åŠ é»˜è®¤åˆ†è¾¨ç‡
+                    // Èç¹ûÃ»ÓĞ»ñÈ¡µ½·Ö±æÂÊ£¬Ìí¼ÓÄ¬ÈÏ·Ö±æÂÊ
                     if (camera.supportedResolutions.empty()) {
                         camera.supportedResolutions = {
                             Resolution(640, 480, 30, "VGA"),
@@ -553,7 +555,7 @@ bool V4L2Camera::EnumerateCameras() {
 
 bool V4L2Camera::OpenDevice(const std::string& devicePath) {
     try {
-        // ä½¿ç”¨é˜»å¡æ¨¡å¼æ‰“å¼€è®¾å¤‡ï¼Œè¿™æ ·read()è°ƒç”¨æ›´å¯é 
+        // Ê¹ÓÃ×èÈûÄ£Ê½´ò¿ªÉè±¸£¬ÕâÑùread()µ÷ÓÃ¸ü¿É¿¿
         m_deviceFd = open(devicePath.c_str(), O_RDWR);
         if (m_deviceFd < 0) {
             SetLastError("Failed to open device: " + std::string(strerror(errno)), -26);
@@ -580,7 +582,7 @@ bool V4L2Camera::CloseDevice() {
 
 bool V4L2Camera::SetupDevice() {
     try {
-        // è®¾ç½®è§†é¢‘æ ¼å¼
+        // ÉèÖÃÊÓÆµ¸ñÊ½
         struct v4l2_format fmt;
         memset(&fmt, 0, sizeof(fmt));
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -594,7 +596,7 @@ bool V4L2Camera::SetupDevice() {
             return false;
         }
         
-        // è®¾ç½®å¸§ç‡
+        // ÉèÖÃÖ¡ÂÊ
         struct v4l2_streamparm parm;
         memset(&parm, 0, sizeof(parm));
         parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -616,7 +618,7 @@ bool V4L2Camera::SetupDevice() {
 
 bool V4L2Camera::AllocateBuffers() {
     try {
-        // è¯·æ±‚ç¼“å†²åŒº
+        // ÇëÇó»º³åÇø
         struct v4l2_requestbuffers req;
         memset(&req, 0, sizeof(req));
         req.count = 4;
@@ -631,7 +633,7 @@ bool V4L2Camera::AllocateBuffers() {
         m_bufferCount = req.count;
         m_buffers.resize(m_bufferCount);
         
-        // æ˜ å°„ç¼“å†²åŒº
+        // Ó³Éä»º³åÇø
         for (int i = 0; i < m_bufferCount; ++i) {
             struct v4l2_buffer buf;
             memset(&buf, 0, sizeof(buf));
@@ -675,13 +677,13 @@ void V4L2Camera::FreeBuffers() {
 
 bool V4L2Camera::StartStreaming() {
     try {
-        // åˆ†é…å†…å­˜æ˜ å°„ç¼“å†²åŒº
+        // ·ÖÅäÄÚ´æÓ³Éä»º³åÇø
         if (!AllocateBuffers()) {
             SetLastError("Failed to allocate buffers", -35);
             return false;
         }
         
-        // å°†ç¼“å†²åŒºåŠ å…¥é˜Ÿåˆ—
+        // ½«»º³åÇø¼ÓÈë¶ÓÁĞ
         for (int i = 0; i < m_bufferCount; ++i) {
             struct v4l2_buffer buf;
             memset(&buf, 0, sizeof(buf));
@@ -695,14 +697,14 @@ bool V4L2Camera::StartStreaming() {
             }
         }
         
-        // å¼€å§‹æµ
+        // ¿ªÊ¼Á÷
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if (ioctl(m_deviceFd, VIDIOC_STREAMON, &type) < 0) {
             SetLastError("Failed to start streaming: " + std::string(strerror(errno)), -36);
             return false;
         }
         
-        // å¯åŠ¨æ•è·çº¿ç¨‹
+        // Æô¶¯²¶»ñÏß³Ì
         m_captureRunning = true;
         m_captureThread = std::thread(&V4L2Camera::CaptureLoop, this);
         
@@ -716,13 +718,13 @@ bool V4L2Camera::StartStreaming() {
 
 bool V4L2Camera::StopStreaming() {
     try {
-        // åœæ­¢æ•è·çº¿ç¨‹
+        // Í£Ö¹²¶»ñÏß³Ì
         m_captureRunning = false;
         if (m_captureThread.joinable()) {
             m_captureThread.join();
         }
         
-        // åœæ­¢æµ
+        // Í£Ö¹Á÷
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if (ioctl(m_deviceFd, VIDIOC_STREAMOFF, &type) < 0) {
             SetLastError("Failed to stop streaming: " + std::string(strerror(errno)), -38);
@@ -747,12 +749,12 @@ void V4L2Camera::CaptureLoop() {
             
             if (ioctl(m_deviceFd, VIDIOC_DQBUF, &buf) < 0) {
                 if (errno != EAGAIN) {
-                    break; // é”™è¯¯ï¼Œé€€å‡ºå¾ªç¯
+                    break; // ´íÎó£¬ÍË³öÑ­»·
                 }
-                continue; // æš‚æ—¶æ²¡æœ‰æ•°æ®ï¼Œç»§ç»­ç­‰å¾…
+                continue; // ÔİÊ±Ã»ÓĞÊı¾İ£¬¼ÌĞøµÈ´ı
             }
             
-            // ä¿å­˜æœ€æ–°çš„å¸§æ•°æ®åˆ°æˆå‘˜å˜é‡
+            // ±£´æ×îĞÂµÄÖ¡Êı¾İµ½³ÉÔ±±äÁ¿
             if (buf.index < m_buffers.size() && m_buffers[buf.index].start) {
                 std::lock_guard<std::mutex> lock(m_frameMutex);
                 m_latestFrameIndex = buf.index;
@@ -760,13 +762,13 @@ void V4L2Camera::CaptureLoop() {
                 m_frameAvailable = true;
             }
             
-            // å°†ç¼“å†²åŒºé‡æ–°åŠ å…¥é˜Ÿåˆ—
+            // ½«»º³åÇøÖØĞÂ¼ÓÈë¶ÓÁĞ
             if (ioctl(m_deviceFd, VIDIOC_QBUF, &buf) < 0) {
-                break; // é”™è¯¯ï¼Œé€€å‡ºå¾ªç¯
+                break; // ´íÎó£¬ÍË³öÑ­»·
             }
             
         } catch (const std::exception& e) {
-            // è®°å½•é”™è¯¯ä½†ç»§ç»­è¿è¡Œ
+            // ¼ÇÂ¼´íÎóµ«¼ÌĞøÔËĞĞ
             std::cerr << "Exception in capture loop: " << e.what() << std::endl;
         }
     }
@@ -819,12 +821,12 @@ bool V4L2Camera::CheckDeviceCapabilities(int fd) {
         return false;
     }
     
-    // æ£€æŸ¥æ˜¯å¦æ˜¯è§†é¢‘æ•è·è®¾å¤‡
+    // ¼ì²éÊÇ·ñÊÇÊÓÆµ²¶»ñÉè±¸
     if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
         return false;
     }
     
-    // æ£€æŸ¥æ˜¯å¦æ”¯æŒæµå¼I/O
+    // ¼ì²éÊÇ·ñÖ§³ÖÁ÷Ê½I/O
     if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
         return false;
     }
@@ -850,7 +852,7 @@ std::vector<Resolution> V4L2Camera::GetSupportedResolutions(int fd, uint32_t pix
         }
         
     } catch (const std::exception& e) {
-        // å¦‚æœæšä¸¾å¤±è´¥ï¼Œè¿”å›é»˜è®¤åˆ†è¾¨ç‡
+        // Èç¹ûÃ¶¾ÙÊ§°Ü£¬·µ»ØÄ¬ÈÏ·Ö±æÂÊ
         resolutions = {
             Resolution(640, 480, 30, "VGA"),
             Resolution(1280, 720, 30, "HD"),
@@ -874,7 +876,7 @@ std::vector<PixelFormat> V4L2Camera::GetSupportedPixelFormats(int fd) {
             PixelFormat format = V4L2ToPixelFormat(fmt.pixelformat);
             if (format != PixelFormat::Unknown) {
                 formats.push_back(format);
-                // è¾“å‡ºè°ƒè¯•ä¿¡æ¯
+                // Êä³öµ÷ÊÔĞÅÏ¢
                 std::cout << "Found supported format: " << V4L2FormatToString(fmt.pixelformat) 
                          << " (" << fmt.description << ")" << std::endl;
             }
@@ -894,7 +896,7 @@ std::vector<PixelFormat> V4L2Camera::GetSupportedPixelFormats(int fd) {
     return formats;
 }
 
-// V4L2Factory å®ç°
+// V4L2Factory ÊµÏÖ
 V4L2Factory::V4L2Factory() {
 }
 
@@ -918,29 +920,29 @@ void V4L2Camera::ConvertToRGB(uint8_t* inputData, uint8_t* rgbData, int width, i
             ConvertYUV422ToRGB(inputData, rgbData, width, height);
             break;
         case PixelFormat::RGB24:
-            // RGB24æ•°æ®å¯èƒ½ä¸æ˜¯æ ‡å‡†çš„RGBé¡ºåºï¼Œéœ€è¦éªŒè¯å’Œè½¬æ¢
+            // RGB24Êı¾İ¿ÉÄÜ²»ÊÇ±ê×¼µÄRGBË³Ğò£¬ĞèÒªÑéÖ¤ºÍ×ª»»
             ConvertRGB24ToRGB24(inputData, rgbData, width, height);
             break;
         case PixelFormat::RGB32:
             ConvertRGB32ToRGB24(inputData, rgbData, width, height);
             break;
         case PixelFormat::MJPG:
-            // MJPEGéœ€è¦è§£ç ï¼Œè¿™é‡Œç”Ÿæˆæµ‹è¯•å›¾æ¡ˆ
+            // MJPEGĞèÒª½âÂë£¬ÕâÀïÉú³É²âÊÔÍ¼°¸
             GenerateTestPattern(rgbData, width, height);
             break;
         case PixelFormat::H264:
-            // H264éœ€è¦è§£ç ï¼Œè¿™é‡Œç”Ÿæˆæµ‹è¯•å›¾æ¡ˆ
+            // H264ĞèÒª½âÂë£¬ÕâÀïÉú³É²âÊÔÍ¼°¸
             GenerateTestPattern(rgbData, width, height);
             break;
         default:
-            // æœªçŸ¥æ ¼å¼ï¼Œç”Ÿæˆæµ‹è¯•å›¾æ¡ˆ
+            // Î´Öª¸ñÊ½£¬Éú³É²âÊÔÍ¼°¸
             GenerateTestPattern(rgbData, width, height);
             break;
     }
 }
 
 void V4L2Camera::ConvertYUV420ToRGB(uint8_t* yuvData, uint8_t* rgbData, int width, int height) {
-    // å®ç°çœŸæ­£çš„YUV420åˆ°RGBè½¬æ¢
+    // ÊµÏÖÕæÕıµÄYUV420µ½RGB×ª»»
     int ySize = width * height;
     int uvSize = ySize / 4;
     
@@ -953,14 +955,14 @@ void V4L2Camera::ConvertYUV420ToRGB(uint8_t* yuvData, uint8_t* rgbData, int widt
             int rgbIndex = (y * width + x) * 3;
             int yIndex = y * width + x;
             
-            // è®¡ç®—UVå¹³é¢ç´¢å¼•ï¼ˆUVå¹³é¢æ˜¯Yå¹³é¢çš„ä¸€åŠå¤§å°ï¼‰
+            // ¼ÆËãUVÆ½ÃæË÷Òı£¨UVÆ½ÃæÊÇYÆ½ÃæµÄÒ»°ë´óĞ¡£©
             int uvIndex = (y / 2) * (width / 2) + (x / 2);
             
             uint8_t Y = yPlane[yIndex];
             uint8_t U = uPlane[uvIndex];
             uint8_t V = vPlane[uvIndex];
             
-            // YUVåˆ°RGBè½¬æ¢ï¼ˆITU-R BT.601æ ‡å‡†ï¼‰
+            // YUVµ½RGB×ª»»£¨ITU-R BT.601±ê×¼£©
             int C = Y - 16;
             int D = U - 128;
             int E = V - 128;
@@ -969,7 +971,7 @@ void V4L2Camera::ConvertYUV420ToRGB(uint8_t* yuvData, uint8_t* rgbData, int widt
             int G = (298 * C - 100 * D - 208 * E + 128) >> 8;
             int B = (298 * C + 516 * D + 128) >> 8;
             
-            // é™åˆ¶èŒƒå›´
+            // ÏŞÖÆ·¶Î§
             R = std::max(0, std::min(255, R));
             G = std::max(0, std::min(255, G));
             B = std::max(0, std::min(255, B));
@@ -982,24 +984,24 @@ void V4L2Camera::ConvertYUV420ToRGB(uint8_t* yuvData, uint8_t* rgbData, int widt
 }
 
 void V4L2Camera::ConvertYUV422ToRGB(uint8_t* yuvData, uint8_t* rgbData, int width, int height) {
-    // å®ç°çœŸæ­£çš„YUV422åˆ°RGBè½¬æ¢ï¼ˆYUYVæ ¼å¼ï¼‰
+    // ÊµÏÖÕæÕıµÄYUV422µ½RGB×ª»»£¨YUYV¸ñÊ½£©
     std::cout << "Converting YUV422 to RGB: " << width << "x" << height << std::endl;
     
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x += 2) {
-            int yuyvIndex = y * width * 2 + x * 2; // YUYVæ ¼å¼ï¼Œæ¯åƒç´ 2å­—èŠ‚
+            int yuyvIndex = y * width * 2 + x * 2; // YUYV¸ñÊ½£¬Ã¿ÏñËØ2×Ö½Ú
             
             uint8_t Y1 = yuvData[yuyvIndex];
             uint8_t U = yuvData[yuyvIndex + 1];
             uint8_t Y2 = yuvData[yuyvIndex + 2];
             uint8_t V = yuvData[yuyvIndex + 3];
             
-            // å¤„ç†ä¸¤ä¸ªåƒç´ 
+            // ´¦ÀíÁ½¸öÏñËØ
             for (int i = 0; i < 2 && (x + i) < width; i++) {
                 int rgbIndex = (y * width + x + i) * 3;
                 uint8_t Y = (i == 0) ? Y1 : Y2;
                 
-                // YUVåˆ°RGBè½¬æ¢
+                // YUVµ½RGB×ª»»
                 int C = Y - 16;
                 int D = U - 128;
                 int E = V - 128;
@@ -1008,7 +1010,7 @@ void V4L2Camera::ConvertYUV422ToRGB(uint8_t* yuvData, uint8_t* rgbData, int widt
                 int G = (298 * C - 100 * D - 208 * E + 128) >> 8;
                 int B = (298 * C + 516 * D + 128) >> 8;
                 
-                // é™åˆ¶èŒƒå›´
+                // ÏŞÖÆ·¶Î§
                 R = std::max(0, std::min(255, R));
                 G = std::max(0, std::min(255, G));
                 B = std::max(0, std::min(255, B));
@@ -1020,7 +1022,7 @@ void V4L2Camera::ConvertYUV422ToRGB(uint8_t* yuvData, uint8_t* rgbData, int widt
         }
     }
     
-    // è¾“å‡ºå‰å‡ ä¸ªåƒç´ çš„è°ƒè¯•ä¿¡æ¯
+    // Êä³öÇ°¼¸¸öÏñËØµÄµ÷ÊÔĞÅÏ¢
     std::cout << "First few pixels: ";
     for (int i = 0; i < 9; i++) {
         std::cout << (int)rgbData[i] << " ";
@@ -1029,38 +1031,38 @@ void V4L2Camera::ConvertYUV422ToRGB(uint8_t* yuvData, uint8_t* rgbData, int widt
 }
 
 void V4L2Camera::GenerateRealisticCameraImage(uint8_t* rgbData, int width, int height) {
-    // ç”Ÿæˆçœ‹èµ·æ¥åƒçœŸå®æ‘„åƒå¤´çš„å›¾åƒ
+    // Éú³É¿´ÆğÀ´ÏñÕæÊµÉãÏñÍ·µÄÍ¼Ïñ
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int index = (y * width + x) * 3;
             
-            // åˆ›å»ºæ¸å˜èƒŒæ™¯
+            // ´´½¨½¥±ä±³¾°
             float fx = (float)x / width;
             float fy = (float)y / height;
             
-            // åŸºç¡€é¢œè‰²ï¼ˆæ¨¡æ‹Ÿå®¤å†…ç¯å¢ƒï¼‰
+            // »ù´¡ÑÕÉ«£¨Ä£ÄâÊÒÄÚ»·¾³£©
             int baseR = 80 + (int)(fx * 40);  // 80-120
             int baseG = 100 + (int)(fy * 30); // 100-130
             int baseB = 120 + (int)((fx + fy) * 20); // 120-160
             
-            // æ·»åŠ ä¸€äº›å™ªå£°å’Œå˜åŒ–
+            // Ìí¼ÓÒ»Ğ©ÔëÉùºÍ±ä»¯
             static int timeOffset = 0;
             timeOffset++;
             if (timeOffset > 1000) timeOffset = 0;
             
-            // æ·»åŠ æ—¶é—´å˜åŒ–
+            // Ìí¼ÓÊ±¼ä±ä»¯
             int timeR = (timeOffset / 20) % 20;
             int timeG = (timeOffset / 30) % 15;
             int timeB = (timeOffset / 25) % 25;
             
-            // æ·»åŠ éšæœºå™ªå£°
+            // Ìí¼ÓËæ»úÔëÉù
             int noise = (x + y + timeOffset) % 10 - 5;
             
             int r = std::max(0, std::min(255, baseR + timeR + noise));
             int g = std::max(0, std::min(255, baseG + timeG + noise));
             int b = std::max(0, std::min(255, baseB + timeB + noise));
             
-            // æ·»åŠ ä¸€äº›åœ†å½¢åŒºåŸŸï¼ˆæ¨¡æ‹Ÿç‰©ä½“ï¼‰
+            // Ìí¼ÓÒ»Ğ©Ô²ĞÎÇøÓò£¨Ä£ÄâÎïÌå£©
             float centerX = width * 0.3f;
             float centerY = height * 0.4f;
             float radius = width * 0.15f;
@@ -1070,14 +1072,14 @@ void V4L2Camera::GenerateRealisticCameraImage(uint8_t* rgbData, int width, int h
             float distance = sqrt(dx * dx + dy * dy);
             
             if (distance < radius) {
-                // åœ¨åœ†å½¢åŒºåŸŸå†…æ·»åŠ ä¸åŒçš„é¢œè‰²
+                // ÔÚÔ²ĞÎÇøÓòÄÚÌí¼Ó²»Í¬µÄÑÕÉ«
                 float factor = 1.0f - (distance / radius);
                 r = (int)(r * (1.0f - factor * 0.3f));
                 g = (int)(g * (1.0f - factor * 0.2f));
                 b = (int)(b * (1.0f + factor * 0.4f));
             }
             
-            // æ·»åŠ å¦ä¸€ä¸ªåœ†å½¢åŒºåŸŸ
+            // Ìí¼ÓÁíÒ»¸öÔ²ĞÎÇøÓò
             centerX = width * 0.7f;
             centerY = height * 0.6f;
             radius = width * 0.1f;
@@ -1102,7 +1104,7 @@ void V4L2Camera::GenerateRealisticCameraImage(uint8_t* rgbData, int width, int h
 
 
 void V4L2Camera::ConvertRGB24ToRGB24(uint8_t* inputData, uint8_t* rgbData, int width, int height) {
-    // æ£€æŸ¥æ•°æ®æ˜¯å¦çœ‹èµ·æ¥åƒæœ‰æ•ˆçš„RGBæ•°æ®
+    // ¼ì²éÊı¾İÊÇ·ñ¿´ÆğÀ´ÏñÓĞĞ§µÄRGBÊı¾İ
     bool looksLikeValidRGB = true;
     int sampleCount = std::min(100, width * height);
     
@@ -1112,7 +1114,7 @@ void V4L2Camera::ConvertRGB24ToRGB24(uint8_t* inputData, uint8_t* rgbData, int w
         uint8_t g = inputData[index + 1];
         uint8_t b = inputData[index + 2];
         
-        // æ£€æŸ¥æ˜¯å¦æ‰€æœ‰å€¼éƒ½æ˜¯ç›¸åŒçš„ï¼ˆå¯èƒ½æ˜¯æŸåçš„æ•°æ®ï¼‰
+        // ¼ì²éÊÇ·ñËùÓĞÖµ¶¼ÊÇÏàÍ¬µÄ£¨¿ÉÄÜÊÇËğ»µµÄÊı¾İ£©
         if (r == g && g == b && r == 128) {
             looksLikeValidRGB = false;
             break;
@@ -1120,63 +1122,63 @@ void V4L2Camera::ConvertRGB24ToRGB24(uint8_t* inputData, uint8_t* rgbData, int w
     }
     
     if (looksLikeValidRGB) {
-        // æ•°æ®çœ‹èµ·æ¥æœ‰æ•ˆï¼Œä½†å¯èƒ½æ˜¯BGRæ ¼å¼ï¼Œå°è¯•BGRåˆ°RGBè½¬æ¢
+        // Êı¾İ¿´ÆğÀ´ÓĞĞ§£¬µ«¿ÉÄÜÊÇBGR¸ñÊ½£¬³¢ÊÔBGRµ½RGB×ª»»
         for (int i = 0; i < width * height; i++) {
             int srcIndex = i * 3;
             int dstIndex = i * 3;
             
-            // å°è¯•BGRåˆ°RGBè½¬æ¢
+            // ³¢ÊÔBGRµ½RGB×ª»»
             rgbData[dstIndex] = inputData[srcIndex + 2];     // R = B
             rgbData[dstIndex + 1] = inputData[srcIndex + 1]; // G = G
             rgbData[dstIndex + 2] = inputData[srcIndex];     // B = R
         }
     } else {
-        // æ•°æ®çœ‹èµ·æ¥æ— æ•ˆï¼Œç”Ÿæˆæµ‹è¯•å›¾æ¡ˆ
+        // Êı¾İ¿´ÆğÀ´ÎŞĞ§£¬Éú³É²âÊÔÍ¼°¸
         GenerateTestPattern(rgbData, width, height);
     }
 }
 
 void V4L2Camera::ConvertRGB32ToRGB24(uint8_t* rgb32Data, uint8_t* rgb24Data, int width, int height) {
     for (int i = 0; i < width * height; i++) {
-        int srcIndex = i * 4;  // RGB32: 4å­—èŠ‚æ¯åƒç´ 
-        int dstIndex = i * 3;  // RGB24: 3å­—èŠ‚æ¯åƒç´ 
+        int srcIndex = i * 4;  // RGB32: 4×Ö½ÚÃ¿ÏñËØ
+        int dstIndex = i * 3;  // RGB24: 3×Ö½ÚÃ¿ÏñËØ
         
         rgb24Data[dstIndex] = rgb32Data[srcIndex];     // R
         rgb24Data[dstIndex + 1] = rgb32Data[srcIndex + 1]; // G
         rgb24Data[dstIndex + 2] = rgb32Data[srcIndex + 2]; // B
-        // è·³è¿‡Alphaé€šé“
+        // Ìø¹ıAlphaÍ¨µÀ
     }
 }
 
 void V4L2Camera::GenerateTestPattern(uint8_t* rgbData, int width, int height) {
-    // ç”Ÿæˆæ¸…æ™°çš„å½©è‰²æµ‹è¯•å›¾æ¡ˆ
+    // Éú³ÉÇåÎúµÄ²ÊÉ«²âÊÔÍ¼°¸
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int index = (y * width + x) * 3;
             
-            // åˆ›å»ºæ¸…æ™°çš„å½©è‰²æ¡çº¹å›¾æ¡ˆ
+            // ´´½¨ÇåÎúµÄ²ÊÉ«ÌõÎÆÍ¼°¸
             int r = (x * 255) / width;
             int g = (y * 255) / height;
-            int b = 128; // å›ºå®šçš„è“è‰²åˆ†é‡
+            int b = 128; // ¹Ì¶¨µÄÀ¶É«·ÖÁ¿
             
-            // æ·»åŠ æ—¶é—´å˜åŒ–ï¼Œä½¿å›¾æ¡ˆåŠ¨æ€
+            // Ìí¼ÓÊ±¼ä±ä»¯£¬Ê¹Í¼°¸¶¯Ì¬
             static int timeOffset = 0;
             timeOffset++;
             if (timeOffset > 200) timeOffset = 0;
             
-            // æ·»åŠ åŠ¨æ€å˜åŒ–
+            // Ìí¼Ó¶¯Ì¬±ä»¯
             r = (r + (timeOffset / 5) % 30) % 256;
             g = (g + (timeOffset / 7) % 30) % 256;
             b = (b + (timeOffset / 10) % 30) % 256;
             
-            // æ·»åŠ æ¸…æ™°çš„æ£‹ç›˜æ ¼æ•ˆæœ
+            // Ìí¼ÓÇåÎúµÄÆåÅÌ¸ñĞ§¹û
             if (((x / 40) + (y / 40)) % 2 == 0) {
                 r = (r + 50) % 256;
                 g = (g + 100) % 256;
                 b = (b + 50) % 256;
             }
             
-            // æ·»åŠ ä¸­å¿ƒåå­—çº¿
+            // Ìí¼ÓÖĞĞÄÊ®×ÖÏß
             if (x == width / 2 || y == height / 2) {
                 r = 255;
                 g = 255;
@@ -1196,7 +1198,7 @@ bool V4L2Camera::AutoDetectBestFormat() {
         return false;
     }
     
-    // åŠ¨æ€è·å–è®¾å¤‡æ”¯æŒçš„æ ¼å¼
+    // ¶¯Ì¬»ñÈ¡Éè±¸Ö§³ÖµÄ¸ñÊ½
     std::vector<PixelFormat> supportedFormats = GetSupportedPixelFormats(m_deviceFd);
     
     if (supportedFormats.empty()) {
@@ -1206,17 +1208,17 @@ bool V4L2Camera::AutoDetectBestFormat() {
     
     std::cout << "Device supports " << supportedFormats.size() << " formats" << std::endl;
     
-    // å®šä¹‰æ ¼å¼ä¼˜å…ˆçº§ï¼ˆåŸºäºå¤„ç†å¤æ‚åº¦å’Œè´¨é‡ï¼‰
+    // ¶¨Òå¸ñÊ½ÓÅÏÈ¼¶£¨»ùÓÚ´¦Àí¸´ÔÓ¶ÈºÍÖÊÁ¿£©
     std::map<PixelFormat, int> formatPriority = {
-        {PixelFormat::YUV422, 1},   // æœ€é«˜ä¼˜å…ˆçº§ï¼šæœªå‹ç¼©ï¼Œå¤„ç†ç®€å•
-        {PixelFormat::YUV420, 2},   // æ¬¡é«˜ä¼˜å…ˆçº§ï¼šæœªå‹ç¼©ï¼Œå¤„ç†ç®€å•
-        {PixelFormat::RGB24, 3},    // ä¸­ç­‰ä¼˜å…ˆçº§ï¼šæœªå‹ç¼©ï¼Œæ— éœ€è½¬æ¢
-        {PixelFormat::RGB32, 4},    // ä¸­ç­‰ä¼˜å…ˆçº§ï¼šæœªå‹ç¼©ï¼Œç®€å•è½¬æ¢
-        {PixelFormat::MJPG, 5},     // è¾ƒä½ä¼˜å…ˆçº§ï¼šå‹ç¼©ï¼Œéœ€è¦è§£ç 
-        {PixelFormat::H264, 6},     // æœ€ä½ä¼˜å…ˆçº§ï¼šå‹ç¼©ï¼Œå¤æ‚è§£ç 
+        {PixelFormat::YUV422, 1},   // ×î¸ßÓÅÏÈ¼¶£ºÎ´Ñ¹Ëõ£¬´¦Àí¼òµ¥
+        {PixelFormat::YUV420, 2},   // ´Î¸ßÓÅÏÈ¼¶£ºÎ´Ñ¹Ëõ£¬´¦Àí¼òµ¥
+        {PixelFormat::RGB24, 3},    // ÖĞµÈÓÅÏÈ¼¶£ºÎ´Ñ¹Ëõ£¬ÎŞĞè×ª»»
+        {PixelFormat::RGB32, 4},    // ÖĞµÈÓÅÏÈ¼¶£ºÎ´Ñ¹Ëõ£¬¼òµ¥×ª»»
+        {PixelFormat::MJPG, 5},     // ½ÏµÍÓÅÏÈ¼¶£ºÑ¹Ëõ£¬ĞèÒª½âÂë
+        {PixelFormat::H264, 6},     // ×îµÍÓÅÏÈ¼¶£ºÑ¹Ëõ£¬¸´ÔÓ½âÂë
     };
     
-    // æŒ‰ä¼˜å…ˆçº§æ’åºæ”¯æŒçš„æ ¼å¼
+    // °´ÓÅÏÈ¼¶ÅÅĞòÖ§³ÖµÄ¸ñÊ½
     std::sort(supportedFormats.begin(), supportedFormats.end(), 
         [&formatPriority](PixelFormat a, PixelFormat b) {
             int priorityA = formatPriority.count(a) ? formatPriority[a] : 999;
@@ -1224,7 +1226,7 @@ bool V4L2Camera::AutoDetectBestFormat() {
             return priorityA < priorityB;
         });
     
-    // å°è¯•æ¯ç§æ”¯æŒçš„æ ¼å¼
+    // ³¢ÊÔÃ¿ÖÖÖ§³ÖµÄ¸ñÊ½
     for (auto format : supportedFormats) {
         std::cout << "Trying format: " << static_cast<int>(format) << std::endl;
         if (TryFormat(format)) {
@@ -1244,7 +1246,7 @@ bool V4L2Camera::TryFormat(PixelFormat format) {
     }
     
     try {
-        // å°è¯•è®¾ç½®æ ¼å¼
+        // ³¢ÊÔÉèÖÃ¸ñÊ½
         struct v4l2_format fmt;
         memset(&fmt, 0, sizeof(fmt));
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1254,12 +1256,12 @@ bool V4L2Camera::TryFormat(PixelFormat format) {
         fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
         
         if (ioctl(m_deviceFd, VIDIOC_S_FMT, &fmt) < 0) {
-            return false; // æ ¼å¼ä¸æ”¯æŒ
+            return false; // ¸ñÊ½²»Ö§³Ö
         }
         
-        // æ£€æŸ¥è¿”å›çš„æ ¼å¼æ˜¯å¦åŒ¹é…
+        // ¼ì²é·µ»ØµÄ¸ñÊ½ÊÇ·ñÆ¥Åä
         if (fmt.fmt.pix.pixelformat != PixelFormatToV4L2(format)) {
-            return false; // æ ¼å¼è¢«ä¿®æ”¹ï¼Œä¸æ”¯æŒ
+            return false; // ¸ñÊ½±»ĞŞ¸Ä£¬²»Ö§³Ö
         }
         
         return true;
@@ -1272,7 +1274,7 @@ bool V4L2Camera::TryFormat(PixelFormat format) {
 } // namespace Plugins
 } // namespace AsTestTool
 
-// å¯¼å‡ºå‡½æ•°å®ç°
+// µ¼³öº¯ÊıÊµÏÖ
 extern "C" {
     AsTestTool::Plugins::IPluginFactory* CreatePluginFactory() {
         return new AsTestTool::Plugins::V4L2Factory();
