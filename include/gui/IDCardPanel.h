@@ -31,7 +31,7 @@ public:
      * @brief 设置身份证阅读器设备
      * @param reader 身份证阅读器设备
      */
-    void SetIDCardReader(std::shared_ptr<IIDCardReader> reader);
+    void SetIDCardReader(IIDCardReader* reader);
 
     /**
      * @brief 渲染面板
@@ -57,7 +57,8 @@ private:
     ImVec4 GetDeviceStatusColor() const;
 
 private:
-    std::shared_ptr<IIDCardReader> m_idCardReader;
+    IIDCardReader* m_idCardReader = nullptr;
+    std::unique_ptr<IIDCardReader> m_customReader;
     IDCardInfo m_currentCardInfo;
     bool m_hasCardInfo = false;
     

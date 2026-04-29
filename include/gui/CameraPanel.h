@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <vector>
 #include <string>
 #include <memory>
@@ -71,8 +72,25 @@ private:
     void RenderImageEnhancement();
     void RenderPreviewOverlay();
     void RenderImageInfo();
+    void RenderFullscreenPreview();
     void RenderGridLines(const ImVec2& startPos, const ImVec2& size);
     void RenderResolutionSelector();
+    void RenderCaptureActionButtons(float buttonWidth, float buttonHeight);
+    void RenderPreviewToggleButton(float buttonWidth, float buttonHeight);
+    void RenderDisplayControls(bool showResolutionSelector, bool includePreviewToggle, float actionButtonWidth, float actionButtonHeight, float previewButtonWidth, float previewButtonHeight);
+    void RenderBasicAdjustmentControls(const char* brightnessId, const char* contrastId, const char* saturationId, bool includeSaturation);
+    void RenderQuickAdjustmentControls(const char* brightnessId, const char* contrastId, const char* modeId);
+    void RenderCaptureModeSelector(const char* controlId, const char* label, bool shortLabels);
+    void ApplyBrightnessSetting();
+    void ApplyContrastSetting();
+    void ResetBasicImageAdjustments();
+    void SyncCurrentFrame(const std::vector<uint8_t>& imageData, int width, int height, Plugins::PixelFormat format);
+    void ResetPreviewFrameState();
+    void StopRecordingSession();
+    bool UpdateDocumentDetectionFromFrame(const std::vector<uint8_t>& imageData, int width, int height, Plugins::PixelFormat format, bool logResult);
+    bool OpenRecordingOutputDirectory() const;
+    bool ExportRecordingToVideo();
+    std::string GetRecordingDurationText() const;
     std::string GetPixelFormatString(Plugins::PixelFormat format) const;
 
     // 功能方法
@@ -84,8 +102,8 @@ private:
     void ExitFullscreen();
     void RefreshDeviceList();
     void DetectDocumentEdges();
-    void StartPreview();
-    void StopPreview();
+    bool StartPreview();
+    bool StopPreview();
 
     // 成员变量
     std::shared_ptr<Plugins::CameraManager> m_cameraManager;
@@ -122,10 +140,28 @@ private:
     int m_imageWidth = 0;
     int m_imageHeight = 0;
     bool m_hasImageData = false;
+    Plugins::PixelFormat m_currentPixelFormat = Plugins::PixelFormat::Unknown;
+    std::string m_recordingOutputDir;
+    int m_recordingFrameIndex = 0;
+    std::chrono::steady_clock::time_point m_lastRecordedFrameTime{};
+    std::chrono::steady_clock::time_point m_recordingStartTime{};
+    std::chrono::milliseconds m_lastRecordingDuration{0};
+    int m_lastRecordedFrameCount = 0;
+    int m_recordingFPS = 30;
+    std::string m_lastExportedVideoPath;
+    std::string m_videoExportStatus = "未导出";
     
     // 文档检测
     float m_edgeThreshold = 0.5f;
     bool m_showGridLines = false;
+    bool m_autoDetectDocument = false;
+    int m_autoDetectIntervalMs = 250;
+    std::chrono::steady_clock::time_point m_lastDocumentDetectionTime{};
+    bool m_hasDetectedDocument = false;
+    float m_detectedDocumentLeft = 0.0f;
+    float m_detectedDocumentTop = 0.0f;
+    float m_detectedDocumentRight = 0.0f;
+    float m_detectedDocumentBottom = 0.0f;
 };
 
 } // namespace AsTestTool

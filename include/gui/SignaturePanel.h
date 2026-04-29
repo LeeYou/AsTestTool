@@ -36,7 +36,7 @@ public:
      * @brief 设置手写屏设备
      * @param signaturePad 手写屏设备指针
      */
-    void SetSignaturePad(std::shared_ptr<ISignaturePad> signaturePad);
+    void SetSignaturePad(ISignaturePad* signaturePad);
 
 private:
     void RenderDeviceStatus();
@@ -58,7 +58,8 @@ private:
     ImVec4 GetDeviceStatusColor() const;
 
 private:
-    std::shared_ptr<ISignaturePad> m_signaturePad;
+    ISignaturePad* m_signaturePad = nullptr;
+    std::unique_ptr<ISignaturePad> m_customSignaturePad;
     
     // 手写数据
     SignatureData m_currentSignature;

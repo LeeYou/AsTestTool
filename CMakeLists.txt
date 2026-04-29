@@ -144,6 +144,7 @@ set(HEADERS
     include/gui/Theme.h
     include/gui/LayoutManager.h
     include/gui/TextureRenderer.h
+    include/gui/PanelUiHelpers.h
     include/gui/BasePanel.h
     include/utils/Logger.h
     include/utils/LogDisplay.h

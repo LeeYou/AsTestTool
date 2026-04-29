@@ -1,22 +1,45 @@
 #include "gui/SignaturePanel.h"
+#include "gui/PanelUiHelpers.h"
+#include "core/DeviceFactory.h"
 #include "utils/Logger.h"
 #include "utils/FileDialog.h"
 #include "core/DeviceManager.h"
 #include "imgui.h"
 
-namespace {
-constexpr float kPanelButtonWidth = 100.0f;
-constexpr float kPanelButtonHeight = 30.0f;
-
-void ContinueOnSameLineIfFits(float nextItemWidth) {
-    const ImGuiStyle& style = ImGui::GetStyle();
-    if (ImGui::GetContentRegionAvail().x >= nextItemWidth + style.ItemSpacing.x) {
-        ImGui::SameLine();
-    }
-}
-}
+#ifdef PLATFORM_WINDOWS
+#include "devices/signature/WindowsSignaturePad.h"
+#endif
 
 namespace AsTestTool {
+
+namespace {
+
+bool OpenPanelSignatureDevice(ISignaturePad* signaturePad) {
+    if (!signaturePad) {
+        return false;
+    }
+
+#ifdef PLATFORM_WINDOWS
+    if (auto* windowsSignaturePad = dynamic_cast<WindowsSignaturePad*>(signaturePad)) {
+        return windowsSignaturePad->OpenDevice();
+    }
+#endif
+
+    return true;
+}
+
+bool LoadPanelSignatureLibrary(ISignaturePad* signaturePad, const std::string& libraryPath) {
+#ifdef PLATFORM_WINDOWS
+    if (auto* windowsSignaturePad = dynamic_cast<WindowsSignaturePad*>(signaturePad)) {
+        return windowsSignaturePad->LoadLibrary(libraryPath);
+    }
+#endif
+
+    LOG_ERROR("Custom signature library reload is not supported on this platform");
+    return false;
+}
+
+}
 
 SignaturePanel::SignaturePanel() {
     LOG_INFO("SignaturePanel created");
@@ -36,37 +59,24 @@ void SignaturePanel::Render() {
     }
 }
 
-void SignaturePanel::SetSignaturePad(std::shared_ptr<ISignaturePad> signaturePad) {
+void SignaturePanel::SetSignaturePad(ISignaturePad* signaturePad) {
+    m_customSignaturePad.reset();
     m_signaturePad = signaturePad;
     LOG_INFO("Signature pad set to panel");
 }
 
 void SignaturePanel::RenderDeviceStatus() {
-    ImGui::Text("设备状态:");
-    ImGui::SameLine();
-    
     std::string statusText = GetDeviceStatusText();
     ImVec4 statusColor = GetDeviceStatusColor();
-    ImGui::TextColored(statusColor, "%s", statusText.c_str());
-    
-    if (m_signaturePad) {
-        std::string deviceInfo = m_signaturePad->GetDeviceInfo();
-        if (!deviceInfo.empty()) {
-            ImGui::Text("设备信息: %s", deviceInfo.c_str());
-        }
-    }
-    
-    ImGui::Separator();
+    const std::string deviceInfo = m_signaturePad ? m_signaturePad->GetDeviceInfo() : std::string();
+    PanelUi::RenderDeviceStatusBlock(statusText.c_str(), statusColor, deviceInfo.c_str());
 }
 
 void SignaturePanel::RenderSignature() {
-    ImGui::Text("手写轨迹:");
-    ImGui::Separator();
+    PanelUi::RenderSectionTitle("手写轨迹:");
     bool hasValidSignature = m_hasSignature && m_currentSignature.HasData();
     ImVec4 captureStatusColor = hasValidSignature ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-    ImGui::Text("捕获状态:");
-    ImGui::SameLine();
-    ImGui::TextColored(captureStatusColor, "%s", hasValidSignature ? "已捕获" : "未捕获");
+    PanelUi::RenderStatusSummary("捕获状态:", hasValidSignature ? "已捕获" : "未捕获", captureStatusColor);
     
     // 手写区域
     ImVec2 availableSize = ImGui::GetContentRegionAvail();
@@ -74,27 +84,32 @@ void SignaturePanel::RenderSignature() {
     ImGui::BeginChild("Signature", signatureSize, true, ImGuiWindowFlags_NoScrollbar);
     
     if (hasValidSignature) {
-        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "=== 手写数据已捕获 ===");
-        bool useDenseLayout = ImGui::GetContentRegionAvail().x >= 420.0f;
-        if (useDenseLayout) {
-            ImGui::Columns(2, "SignatureInfoColumns", false);
-            ImGui::Text("轨迹点数: %zu", m_currentSignature.GetPointCount());
-            ImGui::NextColumn();
-            ImGui::Text("屏幕尺寸: %dx%d", m_currentSignature.width, m_currentSignature.height);
-            ImGui::Columns(1);
-            ImGui::Text("设备信息: %s", m_currentSignature.deviceInfo.c_str());
-        } else {
-            ImGui::Text("轨迹点数: %zu", m_currentSignature.GetPointCount());
-            ImGui::Text("屏幕尺寸: %dx%d", m_currentSignature.width, m_currentSignature.height);
-            ImGui::Text("设备信息: %s", m_currentSignature.deviceInfo.c_str());
-        }
+        PanelUi::RenderStateBanner("=== 手写数据已捕获 ===", captureStatusColor);
+        const std::string pointCountText = std::to_string(m_currentSignature.GetPointCount());
+        const std::string screenSizeText = std::to_string(m_currentSignature.width) + "x" + std::to_string(m_currentSignature.height);
+        PanelUi::RenderResponsiveInfoFields(
+            "SignatureInfoColumns",
+            std::array<PanelUi::InfoField, 2>{{
+                {"轨迹点数:", pointCountText.c_str()},
+                {"屏幕尺寸:", screenSizeText.c_str()}
+            }},
+            std::array<PanelUi::InfoField, 1>{{
+                {"设备信息:", m_currentSignature.deviceInfo.c_str()}
+            }}
+        );
         
         // 显示轨迹预览（简化版本）
-        ImGui::Separator();
-        ImGui::Text("轨迹预览:");
+        PanelUi::RenderSectionTitle("轨迹预览:");
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         ImVec2 canvasPos = ImGui::GetCursorScreenPos();
-        ImVec2 canvasSize = ImVec2(350, 100);
+        float canvasWidth = ImGui::GetContentRegionAvail().x;
+        if (canvasWidth < 220.0f) {
+            canvasWidth = 220.0f;
+        }
+        if (canvasWidth > 350.0f) {
+            canvasWidth = 350.0f;
+        }
+        ImVec2 canvasSize = ImVec2(canvasWidth, 100.0f);
         
         // 绘制边框
         drawList->AddRect(canvasPos, ImVec2(canvasPos.x + canvasSize.x, canvasPos.y + canvasSize.y), IM_COL32(255, 255, 255, 255));
@@ -120,7 +135,7 @@ void SignaturePanel::RenderSignature() {
         
         ImGui::Dummy(canvasSize);
     } else {
-        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "=== 手写数据未捕获 ===");
+        PanelUi::RenderStateBanner("=== 手写数据未捕获 ===", captureStatusColor);
         ImGui::Text("轨迹点数: 0");
         ImGui::Text("屏幕尺寸: 未获取");
         ImGui::Text("请先连接设备并开始捕获");
@@ -130,103 +145,73 @@ void SignaturePanel::RenderSignature() {
 }
 
 void SignaturePanel::RenderControls() {
-    ImGui::Text("主要操作:");
-    // 设备连接控制
-    if (IsDeviceConnected()) {
-        if (ImGui::Button("断开设备", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
-            DisconnectDevice();
-        }
-        
-        ContinueOnSameLineIfFits(kPanelButtonWidth);
-        if (m_signaturePad && m_signaturePad->IsCapturing()) {
-            if (ImGui::Button("停止捕获", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
+    PanelUi::RenderSectionTitle("主要操作:");
+    PanelUi::RenderConnectionToggleButton(
+        IsDeviceConnected(),
+        [this]() { ConnectDevice(); },
+        [this]() { DisconnectDevice(); }
+    );
+    
+    PanelUi::ContinueOnSameLineIfFits(PanelUi::kButtonWidth);
+    PanelUi::RenderActionButton(
+        m_signaturePad && m_signaturePad->IsCapturing() ? "停止捕获" : "开始捕获",
+        [this]() {
+            if (m_signaturePad && m_signaturePad->IsCapturing()) {
                 StopCapture();
-            }
-        } else {
-            if (ImGui::Button("开始捕获", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
+            } else {
                 StartCapture();
             }
-        }
-        
-        ContinueOnSameLineIfFits(kPanelButtonWidth);
-        if (ImGui::Button("清除轨迹", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
-            ClearSignature();
-        }
-        
-        ContinueOnSameLineIfFits(kPanelButtonWidth);
-        if (ImGui::Button("获取数据", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
-            if (m_signaturePad) {
-                SignatureData data;
-                if (m_signaturePad->GetSignatureData(data)) {
-                    m_currentSignature = data;
-                    m_hasSignature = true;
-                    LOG_INFO("Signature data retrieved successfully");
-                } else {
-                    LOG_WARNING("No signature data available");
-                }
+        },
+        !IsDeviceConnected()
+    );
+    
+    PanelUi::ContinueOnSameLineIfFits(PanelUi::kButtonWidth);
+    PanelUi::RenderActionButton("清除轨迹", [this]() { ClearSignature(); }, !IsDeviceConnected());
+    
+    PanelUi::ContinueOnSameLineIfFits(PanelUi::kButtonWidth);
+    PanelUi::RenderActionButton("获取数据", [this]() {
+        if (m_signaturePad) {
+            SignatureData data;
+            if (m_signaturePad->GetSignatureData(data)) {
+                m_currentSignature = data;
+                m_hasSignature = true;
+                LOG_INFO("Signature data retrieved successfully");
+            } else {
+                LOG_WARNING("No signature data available");
+                m_currentSignature.Clear();
+                m_hasSignature = false;
             }
         }
-    } else {
-        if (ImGui::Button("连接设备", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
-            ConnectDevice();
-        }
-        
-        ContinueOnSameLineIfFits(kPanelButtonWidth);
-        ImGui::BeginDisabled();
-        ImGui::Button("开始捕获", ImVec2(kPanelButtonWidth, kPanelButtonHeight));
-        ImGui::EndDisabled();
-        
-        ContinueOnSameLineIfFits(kPanelButtonWidth);
-        ImGui::BeginDisabled();
-        ImGui::Button("清除轨迹", ImVec2(kPanelButtonWidth, kPanelButtonHeight));
-        ImGui::EndDisabled();
-        
-        ContinueOnSameLineIfFits(kPanelButtonWidth);
-        ImGui::BeginDisabled();
-        ImGui::Button("获取数据", ImVec2(kPanelButtonWidth, kPanelButtonHeight));
-        ImGui::EndDisabled();
-    }
+    }, !IsDeviceConnected());
     
-    ImGui::Separator();
-    ImGui::Text("显示控制:");
+    PanelUi::RenderSectionTitle("显示控制:");
     
     // 全屏模式控制
-    if (ImGui::Button("全屏模式", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
-        if (m_signaturePad) {
-            m_fullscreen = !m_fullscreen;
-            m_signaturePad->SetFullscreen(m_fullscreen);
-            LOG_INFO("Fullscreen mode: " + std::string(m_fullscreen ? "ON" : "OFF"));
-        }
+    PanelUi::RenderActionButton("全屏模式", []() {}, true);
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+        ImGui::SetTooltip("手写屏全屏模式当前尚未提供真实驱动支持");
     }
     
-    ImGui::Separator();
-    ImGui::Text("库管理:");
-    if (ImGui::Button("库设置", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
+    PanelUi::RenderSectionTitle("库管理:");
+    if (ImGui::Button("库设置", ImVec2(PanelUi::kButtonWidth, PanelUi::kButtonHeight))) {
         m_showLibrarySettings = !m_showLibrarySettings;
     }
-    ContinueOnSameLineIfFits(kPanelButtonWidth);
-    if (ImGui::Button("重新加载库", ImVec2(kPanelButtonWidth, kPanelButtonHeight))) {
+    PanelUi::ContinueOnSameLineIfFits(PanelUi::kButtonWidth);
+    PanelUi::RenderActionButton("重新加载库", [this]() {
         LoadSignatureLibrary();
-    }
-    
-    ImGui::Separator();
+    });
 }
 
 void SignaturePanel::RenderLibrarySettings() {
+    PanelUi::PrepareLibrarySettingsWindow();
     if (ImGui::Begin("手写屏库设置", &m_showLibrarySettings)) {
-        ImGui::Text("库文件路径:");
-        ImGui::SameLine();
+        PanelUi::RenderSectionTitle("基础配置:");
         
         char pathBuffer[512];
         strncpy_s(pathBuffer, m_libraryPath.c_str(), sizeof(pathBuffer) - 1);
         pathBuffer[sizeof(pathBuffer) - 1] = '\0';
         
-        if (ImGui::InputText("##LibraryPath", pathBuffer, sizeof(pathBuffer))) {
-            m_libraryPath = std::string(pathBuffer);
-        }
-        
-        ImGui::SameLine();
-        if (ImGui::Button("浏览...", ImVec2(80, 20))) {
+        if (PanelUi::RenderPathSelectorRow("库文件路径:", "##LibraryPath", pathBuffer, sizeof(pathBuffer), [this]() {
             auto fileDialog = FileDialog::Create();
             if (fileDialog) {
                 std::vector<FileDialogFilter> filters = {
@@ -239,32 +224,21 @@ void SignaturePanel::RenderLibrarySettings() {
                     LOG_INFO("Selected DLL file: " + m_libraryPath);
                 }
             }
+        })) {
+            m_libraryPath = std::string(pathBuffer);
         }
         
-        ImGui::Separator();
+        PanelUi::RenderDefaultLibrarySection("CMCC_SIGN.DLL");
         
-        ImGui::Text("默认加载:");
-        ImGui::BulletText("系统DLL: CMCC_SIGN.DLL");
-        ImGui::BulletText("系统会自动在系统目录中查找");
-        ImGui::BulletText("包括: System32, SysWOW64, PATH环境变量等");
-        
-        ImGui::Separator();
-        
-        if (ImGui::Button("应用设置", ImVec2(100, 30))) {
+        PanelUi::RenderDescriptionSection({
+            "- 库文件路径: 手写屏DLL文件路径",
+            "- 支持的库: cmcc_sign.dll 等标准接口库",
+            "- 修改后可点击 [应用设置] 重新记录配置"
+        });
+
+        PanelUi::RenderSettingsActionSection(&m_showLibrarySettings, [this]() {
             LoadSignatureLibrary();
-        }
-        
-        ImGui::SameLine();
-        
-        if (ImGui::Button("关闭", ImVec2(100, 30))) {
-            m_showLibrarySettings = false;
-        }
-        
-        ImGui::Separator();
-        ImGui::Text("说明:");
-        ImGui::Text("- 库文件路径: 手写屏DLL文件路径");
-        ImGui::Text("- 支持的库: cmcc_sign.dll 等标准接口库");
-        ImGui::Text("- 修改后可点击 [应用设置] 重新记录配置");
+        });
     }
     ImGui::End();
 }
@@ -273,19 +247,28 @@ void SignaturePanel::RenderLibrarySettings() {
 void SignaturePanel::ConnectDevice() {
     LOG_INFO("Connecting signature pad device");
     
-    // 从 DeviceManager 获取设备
-    m_signaturePad.reset(DeviceManager::Instance().GetSignaturePad());
+    if (m_customSignaturePad) {
+        m_signaturePad = m_customSignaturePad.get();
+    } else {
+        m_signaturePad = DeviceManager::Instance().GetSignaturePad();
+    }
     
     if (!m_signaturePad) {
         LOG_ERROR("No signature pad device available");
         return;
     }
     
-    if (m_signaturePad->Initialize()) {
-        LOG_INFO("Signature pad device connected successfully");
-    } else {
+    if (!m_signaturePad->Initialize()) {
         LOG_ERROR("Failed to connect signature pad device");
+        return;
     }
+
+    if (!OpenPanelSignatureDevice(m_signaturePad)) {
+        LOG_ERROR("Failed to open signature pad device");
+        return;
+    }
+
+    LOG_INFO("Signature pad device connected successfully");
 }
 
 void SignaturePanel::DisconnectDevice() {
@@ -300,6 +283,9 @@ void SignaturePanel::DisconnectDevice() {
     StopCapture();
     
     m_signaturePad->Shutdown();
+    m_currentSignature.Clear();
+    m_hasSignature = false;
+    m_fullscreen = false;
     LOG_INFO("Signature pad device disconnected successfully");
 }
 
@@ -352,10 +338,39 @@ void SignaturePanel::ClearSignature() {
 
 void SignaturePanel::LoadSignatureLibrary() {
     LOG_INFO("Loading signature pad library: " + m_libraryPath);
-    
-    // 设备库的加载由设备本身处理
-    // 这里主要是记录配置
-    LOG_INFO("Library path configured: " + m_libraryPath);
+
+    if (m_signaturePad && IsDeviceConnected()) {
+        DisconnectDevice();
+    }
+
+    auto customSignaturePad = DeviceFactory::CreateSignaturePad("custom");
+    if (!customSignaturePad) {
+        LOG_ERROR("Failed to create custom signature pad instance");
+        return;
+    }
+
+    if (!customSignaturePad->Initialize()) {
+        LOG_ERROR("Failed to initialize custom signature pad instance");
+        return;
+    }
+
+    if (!LoadPanelSignatureLibrary(customSignaturePad.get(), m_libraryPath)) {
+        customSignaturePad->Shutdown();
+        return;
+    }
+
+    if (!OpenPanelSignatureDevice(customSignaturePad.get())) {
+        LOG_ERROR("Failed to open signature pad after library reload");
+        customSignaturePad->Shutdown();
+        return;
+    }
+
+    m_customSignaturePad = std::move(customSignaturePad);
+    m_signaturePad = m_customSignaturePad.get();
+    m_currentSignature.Clear();
+    m_hasSignature = false;
+    m_fullscreen = false;
+    LOG_INFO("Signature pad library reloaded successfully: " + m_libraryPath);
 }
 
 // 状态检查方法实现
@@ -376,6 +391,10 @@ std::string SignaturePanel::GetDeviceStatusText() const {
 }
 
 ImVec4 SignaturePanel::GetDeviceStatusColor() const {
+    if (!m_signaturePad) {
+        return ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+    }
+
     if (IsDeviceConnected()) {
         return ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // 绿色
     } else {
